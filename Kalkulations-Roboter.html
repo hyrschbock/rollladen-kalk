@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Rollladen-Kalk">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1e293b">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjM2IiBmaWxsPSIjMWUyOTNiIi8+PHRleHQgeD0iOTAiIHk9IjEwNSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjcwIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5SSzwvdGV4dD48L3N2Zz4=">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiUm9sbGxhZGVuLUthbGt1bGF0aW9ucy1Sb2JvdGVyIiwic2hvcnRfbmFtZSI6IlJvbGxsYWRlbi1LYWxrIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJzdGFydF91cmwiOiIuIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmNWY3ZmEiLCJ0aGVtZV9jb2xvciI6IiMxZTI5M2IifQ==">
+<title>Rollladen-Kalkulations-Roboter</title>
+<style>
+  :root {
+    --bg: #f5f7fa; --card: #ffffff; --primary: #2563eb; --primary-hover: #1d4ed8;
+    --danger: #ef4444; --success: #10b981; --text: #1e293b; --text-muted: #64748b;
+    --border: #cbd5e1; --border-light: #e2e8f0; --header-bg: #1e293b; --row-alt: #f8fafc;
+    --shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06); --radius: 8px;
+    --filled: #eff6ff; --filled-border: #bfdbfe;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); padding:20px; min-height:100vh; }
+
+  /* ── Header & Nav ── */
+  .app-header { text-align:center; margin-bottom:14px; }
+  .app-header h1 { font-size:1.6rem; font-weight:700; color:var(--header-bg); }
+  .app-header p { color:var(--text-muted); margin-top:3px; font-size:.85rem; }
+
+  .tab-bar {
+    display:flex; justify-content:center; gap:4px; margin-bottom:18px;
+    background:var(--card); border-radius:var(--radius); padding:4px; box-shadow:var(--shadow);
+    max-width:420px; margin-left:auto; margin-right:auto;
+  }
+  .tab-btn {
+    flex:1; border:none; background:transparent; padding:9px 18px; font-size:.86rem;
+    font-weight:600; color:var(--text-muted); cursor:pointer; border-radius:6px; transition:all .15s;
+  }
+  .tab-btn.active { background:var(--primary); color:#fff; box-shadow:0 2px 8px rgba(37,99,235,.3); }
+  .tab-btn:not(.active):hover { background:#eef2ff; color:var(--primary); }
+
+  .view { display:none; }
+  .view.active { display:block; }
+
+
+  /* ── Summary cards ── */
+  .summary-bar { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-bottom:20px; }
+  .summary-card {
+    background:var(--card); border-radius:var(--radius); padding:12px 22px; box-shadow:var(--shadow);
+    text-align:center; min-width:140px;
+  }
+  .summary-card .label { font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); margin-bottom:3px; }
+  .summary-card .value { font-size:1.25rem; font-weight:700; }
+  .summary-card .value.ek { color:var(--primary); }
+  .summary-card .value.az { color:#8b5cf6; }
+  .summary-card .value.ep { color:var(--success); }
+  .summary-card .value.gp { color:var(--header-bg); }
+
+  /* ── Main Table ── */
+  .table-wrap { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow-x:auto; margin-bottom:16px; }
+  table.calc { width:100%; border-collapse:collapse; font-size:.82rem; table-layout:fixed; }
+  table.calc thead th {
+    background:var(--header-bg); color:#fff; padding:10px 6px; text-align:center;
+    font-weight:600; font-size:.74rem; text-transform:uppercase; letter-spacing:.03em;
+    white-space:nowrap; position:sticky; top:0; border-right:1px solid rgba(255,255,255,.12);
+  }
+  table.calc thead th:first-child { border-radius:var(--radius) 0 0 0; }
+  table.calc thead th:last-child { border-radius:0 var(--radius) 0 0; border-right:none; }
+  table.calc tbody td {
+    padding:7px 5px; text-align:center; vertical-align:middle;
+    border-bottom:1px solid var(--border-light); border-right:1px solid var(--border-light);
+  }
+  table.calc tbody td:last-child { border-right:none; }
+  table.calc tbody tr:hover { background:#f1f5f9; }
+
+  /* Column widths */
+  .c-pos { width:40px; }
+  .c-stk { width:50px; }
+  .c-profil { width:240px; }
+  .c-mass { width:95px; }
+  .c-ausst { width:140px; }
+  .c-ek { width:110px; }
+  .c-az { width:72px; }
+  .c-ep { width:90px; }
+  .c-gp { width:95px; }
+  .c-act { width:36px; }
+
+  /* Separator between groups */
+  .c-mass, .c-ausst { border-right:2px solid var(--border) !important; }
+  td.group-start { border-left:2px solid var(--border) !important; }
+
+  /* Maße styling - more prominent */
+  .mass-input {
+    border:2px solid var(--primary) !important; border-radius:6px; padding:7px 6px;
+    font-size:.9rem !important; font-weight:700 !important; text-align:center;
+    background:#f0f7ff; color:var(--primary);
+  }
+  .mass-input:focus { background:#fff; box-shadow:0 0 0 3px rgba(37,99,235,.2); }
+  .mass-input::placeholder { color:#93c5fd; font-weight:400; }
+
+  /* Inputs & Selects */
+  select, input[type=number] {
+    border:1px solid var(--border-light); border-radius:5px; padding:5px 6px; font-size:.82rem;
+    background:#fff; color:var(--text); transition:all .15s; width:100%; text-align:center;
+  }
+  select:focus, input[type=number]:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,.15); }
+  input[type=number] { -moz-appearance:textfield; }
+  input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
+
+  /* Filled state for Ausstattung selects */
+  select.ausst-filled {
+    background:var(--filled) !important; border-color:var(--filled-border) !important;
+    color:var(--primary); font-weight:600;
+  }
+
+  /* Result cells */
+  .result-cell { font-weight:600; font-size:.84rem; white-space:nowrap; }
+  .result-cell.ek { color:var(--primary); }
+  .result-cell.az { color:#8b5cf6; }
+  .result-cell.ep { color:var(--success); }
+  .result-cell.gp { font-weight:700; color:var(--header-bg); font-size:.88rem; }
+
+  /* EK detail breakdown */
+  .ek-total { font-weight:700; font-size:.92rem; color:var(--primary); margin-bottom:4px; padding-bottom:3px; border-bottom:1px solid var(--border-light); }
+  .ek-detail { font-size:.66rem; color:var(--text-muted); line-height:1.4; }
+  .ek-detail .ek-line { white-space:nowrap; }
+  .ek-detail .ek-profil { color:var(--primary); font-weight:600; }
+
+  /* ── Buttons ── */
+  .btn { border:none; cursor:pointer; border-radius:6px; font-weight:600; transition:all .15s; display:inline-flex; align-items:center; justify-content:center; }
+  .btn-add { background:var(--primary); color:#fff; padding:9px 18px; font-size:.86rem; gap:5px; }
+  .btn-add:hover { background:var(--primary-hover); transform:translateY(-1px); box-shadow:0 4px 12px rgba(37,99,235,.3); }
+  .btn-dup { background:#8b5cf6; color:#fff; padding:9px 18px; font-size:.86rem; gap:5px; }
+  .btn-dup:hover { background:#7c3aed; transform:translateY(-1px); box-shadow:0 4px 12px rgba(139,92,246,.3); }
+  .btn-remove { background:transparent; color:var(--danger); font-size:1rem; width:28px; height:28px; padding:0; }
+  .btn-remove:hover { background:#fef2f2; }
+  .btn-export { background:var(--header-bg); color:#fff; padding:9px 18px; font-size:.86rem; gap:5px; }
+  .btn-export:hover { background:#0f172a; transform:translateY(-1px); }
+  .actions-bar { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:6px; }
+
+  .ausst-select { font-size:.76rem; padding:5px 3px; }
+
+  .pos-badge {
+    display:inline-flex; align-items:center; justify-content:center;
+    background:var(--primary); color:#fff; width:24px; height:24px; border-radius:50%;
+    font-weight:700; font-size:.76rem;
+  }
+
+  /* ── Position separator ── */
+  table.calc tbody tr.pos-separator td {
+    border-bottom:3px solid var(--primary) !important;
+  }
+
+  /* ── Stammdaten view ── */
+  .sd-section { margin-bottom:28px; }
+  .sd-section h2 {
+    font-size:1rem; font-weight:700; color:var(--header-bg); margin-bottom:10px;
+    padding-bottom:6px; border-bottom:2px solid var(--primary);
+  }
+  .sd-table { max-width:720px; }
+  .sd-table input[type=number] { width:90px; text-align:right; font-weight:600; }
+  .sd-table input[type=text] {
+    border:1px solid var(--border-light); border-radius:6px; padding:6px 8px; font-size:.84rem;
+    background:#fff; color:var(--text); width:100%;
+  }
+  .sd-table input[type=text]:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,.15); }
+  .sd-table td { text-align:left; padding:5px 8px; }
+  .sd-table td:not(:first-child) { text-align:right; }
+  .sd-add-row { margin-top:8px; }
+  .sd-btn-sm {
+    border:none; cursor:pointer; border-radius:4px; font-size:.78rem; font-weight:600;
+    padding:4px 10px; transition:all .15s;
+  }
+  .sd-btn-add { background:var(--primary); color:#fff; }
+  .sd-btn-add:hover { background:var(--primary-hover); }
+  .sd-btn-del { background:transparent; color:var(--danger); font-size:.9rem; }
+  .sd-btn-del:hover { background:#fef2f2; }
+  .sd-info {
+    background:#eef2ff; border-radius:6px; padding:12px 16px; margin-bottom:20px;
+    font-size:.84rem; color:var(--primary); line-height:1.5;
+  }
+
+  /* ── Drag & Drop ── */
+  .drag-handle {
+    cursor:grab; color:var(--text-muted); font-size:1rem; user-select:none;
+    display:inline-flex; align-items:center; justify-content:center;
+    width:24px; height:24px; border-radius:4px; transition:all .12s;
+  }
+  .drag-handle:hover { background:var(--border-light); color:var(--text); }
+  .drag-handle:active { cursor:grabbing; }
+  tr.dragging { opacity:.35; background:#dbeafe !important; }
+  tr.drag-insert-above td { border-top:4px solid var(--primary) !important; }
+  tr.drag-insert-below td { border-bottom:4px solid var(--primary) !important; }
+
+  /* ── Checkbox for selection ── */
+  .row-check { width:16px; height:16px; cursor:pointer; accent-color:var(--primary); }
+  tr.row-selected { background:#eff6ff !important; }
+  tr.row-selected td { background:inherit; }
+
+  /* ════════════ MOBILE RESPONSIVE ════════════ */
+
+  /* iOS touch fix — must be outside media query */
+  button, select, input, .tab-btn, .btn, a {
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:rgba(37,99,235,.15);
+  }
+
+  @media (max-width: 860px) {
+    body { padding:12px 8px; -webkit-text-size-adjust:100%; }
+    .app-header h1 { font-size:1.3rem; }
+    .app-header p { font-size:.78rem; }
+
+    /* Summary 2x2 grid */
+    .summary-bar { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .summary-card { padding:10px 14px; min-width:0; }
+    .summary-card .value { font-size:1.1rem; }
+
+    /* Hide table, show card layout */
+    .table-wrap { display:none; }
+    #mobileCards { display:block !important; }
+
+    /* Tab bar touch targets */
+    .tab-btn { padding:14px 18px; font-size:.92rem; min-height:48px; }
+
+    /* Actions */
+    .actions-bar { flex-direction:column; gap:8px; }
+    .actions-bar .btn { width:100%; padding:14px; font-size:.95rem; min-height:48px; }
+
+    /* Stammdaten */
+    .sd-table { max-width:100%; }
+    .sd-table input[type=number] { width:70px; }
+    .sd-table input[type=text] { font-size:.8rem; }
+    .sd-section h2 { font-size:.92rem; }
+  }
+
+  /* Mobile card styles (always defined, only shown on mobile) */
+  #mobileCards { display:none; }
+  .m-card {
+    background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+    margin-bottom:12px; overflow:hidden; border:1px solid var(--border-light);
+  }
+  .m-card-header {
+    background:var(--header-bg); color:#fff; padding:10px 14px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .m-card-header .pos-badge { background:rgba(255,255,255,.2); }
+  .m-card-body { padding:12px 14px; }
+
+  .m-row { display:flex; gap:8px; margin-bottom:8px; align-items:center; }
+  .m-row label { font-size:.72rem; font-weight:600; color:var(--text-muted); text-transform:uppercase;
+    letter-spacing:.03em; min-width:60px; flex-shrink:0; }
+  .m-row select, .m-row input { flex:1; font-size:16px; padding:10px 12px; min-height:48px;
+    touch-action:manipulation; -webkit-appearance:none; appearance:none; border-radius:8px; }
+  .m-row select { background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 12px center; padding-right:32px; }
+  .m-row .mass-input { font-size:18px !important; padding:12px !important; }
+
+  .m-masse { display:flex; gap:8px; margin-bottom:10px; }
+  .m-masse > div { flex:1; }
+  .m-masse label { display:block; font-size:.7rem; font-weight:600; color:var(--text-muted);
+    text-transform:uppercase; letter-spacing:.03em; margin-bottom:3px; }
+
+  .m-ausst { margin-bottom:10px; }
+  .m-ausst label { display:block; font-size:.7rem; font-weight:600; color:var(--text-muted);
+    text-transform:uppercase; letter-spacing:.03em; margin-bottom:3px; }
+  .m-ausst select { width:100%; font-size:16px; padding:10px 12px; min-height:48px; margin-bottom:8px;
+    touch-action:manipulation; -webkit-appearance:none; appearance:none; border-radius:8px;
+    background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 12px center; padding-right:32px; }
+
+  .m-results {
+    display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;
+    padding-top:10px; border-top:2px solid var(--border-light);
+  }
+  .m-result-box { text-align:center; padding:8px; border-radius:6px; background:var(--row-alt); }
+  .m-result-box .m-r-label { font-size:.65rem; text-transform:uppercase; letter-spacing:.04em; color:var(--text-muted); margin-bottom:2px; }
+  .m-result-box .m-r-value { font-size:1.05rem; font-weight:700; }
+  .m-result-box.ek .m-r-value { color:var(--primary); }
+  .m-result-box.az .m-r-value { color:#8b5cf6; }
+  .m-result-box.ep .m-r-value { color:var(--success); }
+  .m-result-box.gp .m-r-value { color:var(--header-bg); font-size:1.15rem; }
+  .m-result-box.gp { grid-column:1/-1; background:#f0f7ff; }
+
+  .m-ek-detail { font-size:.7rem; color:var(--text-muted); margin-top:4px; line-height:1.35; text-align:left; padding:0 4px; }
+
+  .m-card .btn-remove { position:absolute; top:8px; right:8px; }
+
+  .m-stk-row { display:flex; gap:8px; align-items:center; margin-bottom:10px; }
+  .m-stk-row label { font-size:.72rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; }
+  .m-stk-row input { width:80px; font-size:16px; padding:10px; text-align:center; min-height:48px;
+    touch-action:manipulation; border-radius:8px; }
+
+  @media print {
+    body { padding:10px; background:#fff; }
+    .btn, .actions-bar, select, input, .tab-bar, .no-print { display:none !important; }
+    .summary-bar { display:none; }
+    #mobileCards { display:none !important; }
+    .table-wrap { display:block !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>Rollladen-Kalkulations-Roboter</h1>
+  <p>Angebotsvorlagen schnell zusammenklicken</p>
+</div>
+
+<div class="tab-bar">
+  <button type="button" class="tab-btn active" onclick="switchView('calc')">Kalkulation</button>
+  <button type="button" class="tab-btn" onclick="switchView('stamm')">Stammdaten</button>
+</div>
+
+<!-- ════════════ KALKULATION VIEW ════════════ -->
+<div id="viewCalc" class="view active">
+
+<div class="summary-bar">
+  <div class="summary-card"><div class="label">Gesamt EK</div><div class="value ek" id="sumEK">0,00 €</div></div>
+  <div class="summary-card"><div class="label">Gesamt AZ</div><div class="value az" id="sumAZ">0,00 h</div></div>
+  <div class="summary-card"><div class="label">Gesamt EP</div><div class="value ep" id="sumEP">0,00 €</div></div>
+  <div class="summary-card"><div class="label">Gesamt GP</div><div class="value gp" id="sumGP">0,00 €</div></div>
+</div>
+
+<div class="table-wrap">
+<table class="calc" id="calcTable">
+  <thead><tr>
+    <th style="width:28px" class="no-print"></th>
+    <th style="width:28px" class="no-print"></th>
+    <th class="c-pos">Pos</th>
+    <th class="c-stk">Stk</th>
+    <th class="c-profil">Profil</th>
+    <th class="c-mass">Breite (mm)</th>
+    <th class="c-mass">Höhe (mm)</th>
+    <th class="c-ausst">Ausstattung 1</th>
+    <th class="c-ausst">Ausstattung 2</th>
+    <th class="c-ausst">Ausstattung 3</th>
+    <th class="c-ausst">Ausstattung 4</th>
+    <th class="c-ausst">Ausstattung 5</th>
+    <th class="c-ek">EK</th>
+    <th class="c-az">AZ</th>
+    <th class="c-ep">EP</th>
+    <th class="c-gp">GP</th>
+    <th class="c-act no-print"></th>
+  </tr></thead>
+  <tbody id="tableBody"></tbody>
+</table>
+</div>
+
+<div id="mobileCards"></div>
+
+<div class="actions-bar no-print">
+  <button type="button" class="btn btn-add" onclick="addRow()">＋ Neue Position</button>
+  <button type="button" class="btn btn-dup" onclick="dupSelected()">⧉ Markierte duplizieren</button>
+  <button type="button" class="btn btn-export" onclick="exportPDF()">📄 PDF Export</button>
+</div>
+
+</div>
+
+<!-- ════════════ STAMMDATEN VIEW ════════════ -->
+<div id="viewStamm" class="view">
+
+<div class="sd-info">
+  Hier kannst du alle Preise, Profile und Arbeitszeiten anpassen. Änderungen wirken sich sofort auf die Kalkulation aus, wenn du zurück wechselst.
+</div>
+
+<div class="sd-section">
+  <h2>Profilpreise (pro m²)</h2>
+  <div class="table-wrap sd-table">
+    <table><thead><tr><th style="text-align:left">Profil</th><th style="width:100px">EK / m²</th><th style="width:100px">EP / m²</th><th style="width:40px"></th></tr></thead>
+    <tbody id="sdProfile"></tbody></table>
+  </div>
+  <button type="button" class="sd-btn-sm sd-btn-add sd-add-row" onclick="sdAddProfile()">＋ Profil hinzufügen</button>
+</div>
+
+<div class="sd-section">
+  <h2>Ausstattung – Preis nach Breite (pro lfd. Meter)</h2>
+  <div class="table-wrap sd-table">
+    <table><thead><tr><th style="text-align:left">Bezeichnung</th><th style="width:100px">EK / m</th><th style="width:100px">EP / m</th><th style="width:40px"></th></tr></thead>
+    <tbody id="sdBreite"></tbody></table>
+  </div>
+  <button type="button" class="sd-btn-sm sd-btn-add sd-add-row" onclick="sdAddBreite()">＋ Ausstattung hinzufügen</button>
+</div>
+
+<div class="sd-section">
+  <h2>Ausstattung – Preis nach Höhe (pro lfd. Meter)</h2>
+  <div class="table-wrap sd-table">
+    <table><thead><tr><th style="text-align:left">Bezeichnung</th><th style="width:100px">EK / m</th><th style="width:100px">EP / m</th><th style="width:40px"></th></tr></thead>
+    <tbody id="sdHoehe"></tbody></table>
+  </div>
+  <button type="button" class="sd-btn-sm sd-btn-add sd-add-row" onclick="sdAddHoehe()">＋ Ausstattung hinzufügen</button>
+</div>
+
+<div class="sd-section">
+  <h2>Ausstattung – Preis pro Stück</h2>
+  <div class="table-wrap sd-table">
+    <table><thead><tr><th style="text-align:left">Bezeichnung</th><th style="width:100px">EK / Stk</th><th style="width:100px">EP / Stk</th><th style="width:40px"></th></tr></thead>
+    <tbody id="sdStueck"></tbody></table>
+  </div>
+  <button type="button" class="sd-btn-sm sd-btn-add sd-add-row" onclick="sdAddStueck()">＋ Ausstattung hinzufügen</button>
+</div>
+
+<div class="sd-section">
+  <h2>Arbeitszeiten (nach Rollladengröße)</h2>
+  <div class="table-wrap sd-table">
+    <table><thead><tr><th style="text-align:left">Größe</th><th style="width:120px">Arbeitszeit (h)</th></tr></thead>
+    <tbody id="sdAZ"></tbody></table>
+  </div>
+</div>
+
+<div class="sd-section">
+  <h2>Stundensatz (Montage)</h2>
+  <div style="display:flex; align-items:center; gap:10px; padding:10px 0;">
+    <label for="stundensatz" style="font-size:.9rem; font-weight:600; color:var(--text-muted);">Stundensatz:</label>
+    <input type="number" id="stundensatz" min="0" step="5" value="110" onchange="recalc()" oninput="recalc()" style="width:100px; border:1px solid var(--border); border-radius:6px; padding:8px 10px; font-size:.9rem; font-weight:600; text-align:right; background:#fff; color:var(--text);">
+    <span style="font-size:.85rem; color:var(--text-muted);">€ / h</span>
+  </div>
+</div>
+
+</div>
+
+<script>
+// ════════════ EDITABLE DATA ════════════
+let PROFILE = [
+  { name:"Müller PVC", ek:16.17, ep:75 },
+  { name:"Müller PVC Sonderf.", ek:17.27, ep:75 },
+  { name:"Müller PVC Sonderf. + Endleiste Sonderf. Kollektion", ek:19.14, ep:85 },
+  { name:"Müller PVC Sonderf. + Endleiste Sonderf. RAL", ek:23.87, ep:85 },
+  { name:"Müller Alu", ek:32.45, ep:110 },
+  { name:"Müller Alu Sonderf.", ek:34.65, ep:110 },
+  { name:"Müller Alu Sonderf. + Endleiste Sonderf. Kollektion", ek:36.85, ep:120 },
+  { name:"Müller Alu Sonderf. + Endleiste Sonderf. RAL", ek:41.25, ep:120 },
+  { name:"Roma Alu Standardf.", ek:44, ep:130 },
+  { name:"Warema Alu Standardf.", ek:44, ep:130 },
+  { name:"Alulux Alu Standardf.", ek:44, ep:130 }
+];
+let AUSST_BREITE = [
+  { name:"Stahlwelle", ek:4, ep:14 },
+  { name:"Rollladenkastendeckel", ek:5, ep:17.50 },
+  { name:"Abrollprofil", ek:6, ep:21 }
+];
+let AUSST_HOEHE = [
+  { name:"Führungsschienen Flock", ek:6, ep:21 },
+  { name:"Führungsschienen Pinto", ek:7, ep:24.50 },
+  { name:"Führungsschienen Oberteil", ek:7, ep:24.50 },
+  { name:"Einputzzarge", ek:5, ep:17.50 }
+];
+let AUSST_STUECK = [
+  { name:"Elektromotor", ek:60, ep:245 },
+  { name:"Funkmotor", ek:120, ep:285 },
+  { name:"Funk Handsender", ek:40, ep:85 },
+  { name:"Funk Wandsender", ek:40, ep:85 }
+];
+let AZ_TABLE = [
+  { label:"bis 3 m²", maxQm:3, az:2.5 },
+  { label:"bis 6 m²", maxQm:6, az:3 },
+  { label:"bis 8 m²", maxQm:8, az:3.5 },
+  { label:"größer als 8 m²", maxQm:Infinity, az:4 }
+];
+
+// ════════════ VIEW SWITCHING ════════════
+function switchView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if(id === 'calc') {
+    document.getElementById('viewCalc').classList.add('active');
+    document.querySelectorAll('.tab-btn')[0].classList.add('active');
+    syncFromStammdaten();
+    rebuildDropdowns();
+    recalc();
+  } else {
+    document.getElementById('viewStamm').classList.add('active');
+    document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    renderStammdaten();
+  }
+}
+
+// ════════════ HELPERS ════════════
+function fmt(v) { return v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'; }
+function fmtH(v) { return v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' h'; }
+function getAZ(qm) { for(const t of AZ_TABLE) { if(qm <= t.maxQm) return t.az; } return 4; }
+
+// ════════════ DROPDOWN BUILDERS ════════════
+function buildAusstOptions() {
+  let h = '<option value="">– keine –</option>';
+  if(AUSST_BREITE.length) { h += '<optgroup label="nach Breite">'; AUSST_BREITE.forEach((_,i) => h += `<option value="b_${i}">${AUSST_BREITE[i].name}</option>`); h += '</optgroup>'; }
+  if(AUSST_HOEHE.length) { h += '<optgroup label="nach Höhe">'; AUSST_HOEHE.forEach((_,i) => h += `<option value="h_${i}">${AUSST_HOEHE[i].name}</option>`); h += '</optgroup>'; }
+  if(AUSST_STUECK.length) { h += '<optgroup label="pro Stück">'; AUSST_STUECK.forEach((_,i) => h += `<option value="s_${i}">${AUSST_STUECK[i].name}</option>`); h += '</optgroup>'; }
+  return h;
+}
+function buildProfilOptions() {
+  let h = '<option value="">– Profil wählen –</option>';
+  PROFILE.forEach((p,i) => h += `<option value="${i}">${p.name}</option>`);
+  return h;
+}
+
+function rebuildDropdowns() {
+  const ausstHTML = buildAusstOptions();
+  const profilHTML = buildProfilOptions();
+  document.querySelectorAll('#tableBody tr').forEach(tr => {
+    const pSel = tr.querySelector('.profil-select');
+    if(!pSel) return;
+    const pVal = pSel.value;
+    pSel.innerHTML = profilHTML;
+    pSel.value = pVal;
+    for(let n=1; n<=5; n++) {
+      const aSel = tr.querySelector(`.a${n}`);
+      if(!aSel) continue;
+      const aVal = aSel.value;
+      aSel.innerHTML = ausstHTML;
+      aSel.value = aVal;
+    }
+  });
+  updateAusstStyles();
+}
+
+function updateAusstStyles() {
+  document.querySelectorAll('.ausst-select').forEach(sel => {
+    if(sel.value) sel.classList.add('ausst-filled');
+    else sel.classList.remove('ausst-filled');
+  });
+}
+
+// ════════════ ROW MANAGEMENT ════════════
+let rowCounter = 0;
+
+function createRowHTML(stk, profilVal, breite, hoehe) {
+  rowCounter++;
+  const profilHTML = buildProfilOptions();
+  const ausstHTML = buildAusstOptions();
+  return `
+    <td class="no-print"><input type="checkbox" class="row-check" onchange="updateRowSelection(this)"></td>
+    <td class="no-print"><span class="drag-handle" title="Verschieben">☰</span></td>
+    <td><span class="pos-badge">${rowCounter}</span></td>
+    <td><input type="number" min="1" value="${stk}" class="stk-input" onchange="recalc()" oninput="recalc()"></td>
+    <td><select class="profil-select" onchange="recalc()">${profilHTML}</select></td>
+    <td><input type="number" min="0" placeholder="Breite" value="${breite||''}" class="breite-input mass-input" onchange="recalc()" oninput="recalc()"></td>
+    <td><input type="number" min="0" placeholder="Höhe" value="${hoehe||''}" class="hoehe-input mass-input" onchange="recalc()" oninput="recalc()"></td>
+    <td><select class="ausst-select a1" onchange="recalc();updateAusstStyles()">${ausstHTML}</select></td>
+    <td><select class="ausst-select a2" onchange="recalc();updateAusstStyles()">${ausstHTML}</select></td>
+    <td><select class="ausst-select a3" onchange="recalc();updateAusstStyles()">${ausstHTML}</select></td>
+    <td><select class="ausst-select a4" onchange="recalc();updateAusstStyles()">${ausstHTML}</select></td>
+    <td><select class="ausst-select a5" onchange="recalc();updateAusstStyles()">${ausstHTML}</select></td>
+    <td class="result-cell ek" data-ek>–</td>
+    <td class="result-cell az" data-az>–</td>
+    <td class="result-cell ep" data-ep>–</td>
+    <td class="result-cell gp" data-gp>–</td>
+    <td class="no-print"><button type="button" class="btn btn-remove" onclick="removeRow(this)" title="Entfernen">✕</button></td>`;
+}
+
+function addRow() {
+  const tr = document.createElement('tr');
+  tr.innerHTML = createRowHTML(1, '', '', '');
+  document.getElementById('tableBody').appendChild(tr);
+  recalc();
+}
+
+function duplicateRow(srcRow) {
+  const stk = srcRow.querySelector('.stk-input').value || 1;
+  const profilVal = srcRow.querySelector('.profil-select').value;
+  const breite = srcRow.querySelector('.breite-input').value;
+  const hoehe = srcRow.querySelector('.hoehe-input').value;
+  const ausstVals = [];
+  for(let n=1; n<=5; n++) ausstVals.push(srcRow.querySelector(`.a${n}`).value);
+
+  const tr = document.createElement('tr');
+  tr.innerHTML = createRowHTML(stk, '', breite, hoehe);
+  document.getElementById('tableBody').appendChild(tr);
+  tr.querySelector('.profil-select').value = profilVal;
+  for(let n=1; n<=5; n++) tr.querySelector(`.a${n}`).value = ausstVals[n-1];
+}
+
+function dupSelected() {
+  const checked = document.querySelectorAll('#tableBody tr .row-check:checked');
+  if(checked.length === 0) { alert('Bitte mindestens eine Position markieren.'); return; }
+  checked.forEach(cb => duplicateRow(cb.closest('tr')));
+  // Uncheck all after duplication
+  document.querySelectorAll('#tableBody .row-check').forEach(cb => { cb.checked = false; });
+  document.querySelectorAll('#tableBody tr').forEach(tr => tr.classList.remove('row-selected'));
+  updateAusstStyles();
+  recalc();
+}
+
+function updateRowSelection(cb) {
+  const tr = cb.closest('tr');
+  if(cb.checked) tr.classList.add('row-selected');
+  else tr.classList.remove('row-selected');
+}
+
+function removeRow(btn) {
+  btn.closest('tr').remove();
+  renumberRows();
+  recalc();
+}
+
+function renumberRows() {
+  rowCounter = 0;
+  document.querySelectorAll('#tableBody tr').forEach((tr,i) => {
+    rowCounter = i+1;
+    const badge = tr.querySelector('.pos-badge');
+    if(badge) badge.textContent = rowCounter;
+  });
+}
+
+// ════════════ CALCULATION ════════════
+function calcAusstDetail(val, breiteMm, hoeheMm) {
+  if(!val) return null;
+  const [type, idx] = val.split('_');
+  const i = parseInt(idx);
+  let item, mult;
+  if(type === 'b') { item = AUSST_BREITE[i]; mult = breiteMm / 1000; }
+  else if(type === 'h') { item = AUSST_HOEHE[i]; mult = hoeheMm / 1000; }
+  else { item = AUSST_STUECK[i]; mult = 1; }
+  if(!item) return null;
+  return { name:item.name, ek: item.ek * mult, ep: item.ep * mult };
+}
+
+function recalc() {
+  let totalEK=0, totalAZ=0, totalEP=0, totalGP=0;
+  const rows = document.querySelectorAll('#tableBody tr');
+  rows.forEach((tr, idx) => {
+    const profilIdx = tr.querySelector('.profil-select').value;
+    const breite = parseFloat(tr.querySelector('.breite-input').value) || 0;
+    const hoehe = parseFloat(tr.querySelector('.hoehe-input').value) || 0;
+    const stk = parseInt(tr.querySelector('.stk-input').value) || 1;
+
+    // Separator line between positions
+    if(idx < rows.length - 1) tr.classList.add('pos-separator');
+    else tr.classList.remove('pos-separator');
+
+    if(!profilIdx || breite <= 0 || hoehe <= 0) {
+      tr.querySelector('[data-ek]').innerHTML = '–';
+      tr.querySelector('[data-az]').textContent = '–';
+      tr.querySelector('[data-ep]').textContent = '–';
+      tr.querySelector('[data-gp]').textContent = '–';
+      return;
+    }
+
+    const profil = PROFILE[parseInt(profilIdx)];
+    if(!profil) return;
+    const qm = (breite / 1000) * (hoehe / 1000);
+
+    const profilEK = qm * profil.ek;
+    const profilEP = qm * profil.ep;
+    let ek = profilEK;
+    let ep = profilEP;
+
+    // Collect Ausstattung details
+    const ausstDetails = [];
+    for(let n=1; n<=5; n++) {
+      const sel = tr.querySelector(`.a${n}`);
+      if(sel) {
+        const d = calcAusstDetail(sel.value, breite, hoehe);
+        if(d) { ausstDetails.push(d); ek += d.ek; ep += d.ep; }
+      }
+    }
+
+    const az = getAZ(qm);
+    const stundensatz = parseFloat(document.getElementById('stundensatz').value) || 0;
+    const montage = az * stundensatz;
+    ep += montage;
+    const gp = ep * stk;
+
+    // Build EK detail HTML — Gesamt-EK prominent oben, Aufschlüsselung darunter
+    let ekHTML = `<div class="ek-total">${fmt(ek)}</div>`;
+    ekHTML += `<div class="ek-detail">`;
+    ekHTML += `<div class="ek-line ek-profil">Profil: ${fmt(profilEK)}</div>`;
+    ausstDetails.forEach(d => {
+      ekHTML += `<div class="ek-line">+ ${d.name}: ${fmt(d.ek)}</div>`;
+    });
+    ekHTML += `</div>`;
+
+    tr.querySelector('[data-ek]').innerHTML = ekHTML;
+    tr.querySelector('[data-az]').textContent = fmtH(az);
+    tr.querySelector('[data-ep]').textContent = fmt(ep);
+    tr.querySelector('[data-gp]').textContent = fmt(gp);
+
+    totalEK += ek * stk;
+    totalAZ += az * stk;
+    totalEP += ep;
+    totalGP += gp;
+  });
+
+  document.getElementById('sumEK').textContent = fmt(totalEK);
+  document.getElementById('sumAZ').textContent = fmtH(totalAZ);
+  document.getElementById('sumEP').textContent = fmt(totalEP);
+  document.getElementById('sumGP').textContent = fmt(totalGP);
+}
+
+// ════════════ STAMMDATEN ════════════
+function sdRow(name, ek, ep, delFn) {
+  return `<tr>
+    <td><input type="text" value="${name}"></td>
+    <td><input type="number" step="0.01" value="${ek}"></td>
+    <td><input type="number" step="0.01" value="${ep}"></td>
+    <td><button class="sd-btn-sm sd-btn-del" onclick="${delFn}(this)">✕</button></td>
+  </tr>`;
+}
+function renderStammdaten() {
+  let h = '';
+  PROFILE.forEach(p => h += sdRow(p.name, p.ek, p.ep, 'sdDelProfile'));
+  document.getElementById('sdProfile').innerHTML = h;
+  h = '';
+  AUSST_BREITE.forEach(a => h += sdRow(a.name, a.ek, a.ep, 'sdDelBreite'));
+  document.getElementById('sdBreite').innerHTML = h;
+  h = '';
+  AUSST_HOEHE.forEach(a => h += sdRow(a.name, a.ek, a.ep, 'sdDelHoehe'));
+  document.getElementById('sdHoehe').innerHTML = h;
+  h = '';
+  AUSST_STUECK.forEach(a => h += sdRow(a.name, a.ek, a.ep, 'sdDelStueck'));
+  document.getElementById('sdStueck').innerHTML = h;
+  h = '';
+  AZ_TABLE.forEach(t => {
+    h += `<tr><td>${t.label}</td><td><input type="number" step="0.5" value="${t.az}"></td></tr>`;
+  });
+  document.getElementById('sdAZ').innerHTML = h;
+}
+function syncFromStammdaten() {
+  const readRows = (tbodyId) => {
+    const arr = [];
+    document.querySelectorAll(`#${tbodyId} tr`).forEach(tr => {
+      const inputs = tr.querySelectorAll('input');
+      if(inputs.length >= 3) arr.push({ name:inputs[0].value.trim(), ek:parseFloat(inputs[1].value)||0, ep:parseFloat(inputs[2].value)||0 });
+    });
+    return arr;
+  };
+  if(document.querySelectorAll('#sdProfile tr').length > 0) {
+    PROFILE = readRows('sdProfile');
+    AUSST_BREITE = readRows('sdBreite');
+    AUSST_HOEHE = readRows('sdHoehe');
+    AUSST_STUECK = readRows('sdStueck');
+    document.querySelectorAll('#sdAZ tr').forEach((tr, i) => {
+      const inp = tr.querySelector('input[type=number]');
+      if(inp && AZ_TABLE[i]) AZ_TABLE[i].az = parseFloat(inp.value) || 0;
+    });
+  }
+}
+function sdAddProfile() { PROFILE.push({name:"Neues Profil",ek:0,ep:0}); renderStammdaten(); }
+function sdAddBreite() { AUSST_BREITE.push({name:"Neue Ausstattung",ek:0,ep:0}); renderStammdaten(); }
+function sdAddHoehe() { AUSST_HOEHE.push({name:"Neue Ausstattung",ek:0,ep:0}); renderStammdaten(); }
+function sdAddStueck() { AUSST_STUECK.push({name:"Neue Ausstattung",ek:0,ep:0}); renderStammdaten(); }
+function sdDelFromArray(btn, arr, tbodyId) {
+  syncFromStammdaten();
+  const tr = btn.closest('tr');
+  const rows = [...document.querySelectorAll(`#${tbodyId} tr`)];
+  const idx = rows.indexOf(tr);
+  if(idx > -1) arr.splice(idx, 1);
+  renderStammdaten();
+}
+function sdDelProfile(btn) { sdDelFromArray(btn, PROFILE, 'sdProfile'); }
+function sdDelBreite(btn) { sdDelFromArray(btn, AUSST_BREITE, 'sdBreite'); }
+function sdDelHoehe(btn) { sdDelFromArray(btn, AUSST_HOEHE, 'sdHoehe'); }
+function sdDelStueck(btn) { sdDelFromArray(btn, AUSST_STUECK, 'sdStueck'); }
+
+// ════════════ PDF EXPORT ════════════
+function exportPDF() {
+  const rows = document.querySelectorAll('#tableBody tr');
+  if(rows.length === 0) { alert('Bitte mindestens eine Position hinzufügen.'); return; }
+
+  const positions = [];
+  rows.forEach(tr => {
+    const profilIdx = tr.querySelector('.profil-select').value;
+    if(!profilIdx) return;
+    const profil = PROFILE[parseInt(profilIdx)];
+    if(!profil) return;
+    const breite = parseFloat(tr.querySelector('.breite-input').value) || 0;
+    const hoehe = parseFloat(tr.querySelector('.hoehe-input').value) || 0;
+    const stk = parseInt(tr.querySelector('.stk-input').value) || 1;
+    const qm = (breite/1000)*(hoehe/1000);
+
+    const profilEK = qm * profil.ek;
+    const profilEP = qm * profil.ep;
+    let totalEK = profilEK, totalEP = profilEP;
+
+    const ausstLines = [];
+    for(let n=1; n<=5; n++) {
+      const sel = tr.querySelector(`.a${n}`);
+      if(sel && sel.value) {
+        const d = calcAusstDetail(sel.value, breite, hoehe);
+        if(d) { ausstLines.push(d); totalEK += d.ek; totalEP += d.ep; }
+      }
+    }
+
+    const az = getAZ(qm);
+    const stundensatz = parseFloat(document.getElementById('stundensatz').value) || 0;
+    totalEP += az * stundensatz;
+    const gp = totalEP * stk;
+
+    positions.push({
+      pos: tr.querySelector('.pos-badge').textContent,
+      profil: profil.name, breite, hoehe, stk,
+      profilEK, profilEP, ausstLines, totalEK, totalEP, az, gp
+    });
+  });
+
+  const today = new Date().toLocaleDateString('de-DE');
+  const sumEK = document.getElementById('sumEK').textContent;
+  const sumAZ = document.getElementById('sumAZ').textContent;
+  const sumEP = document.getElementById('sumEP').textContent;
+  const sumGP = document.getElementById('sumGP').textContent;
+
+  // Build position rows with detail breakdown
+  let posHTML = '';
+  positions.forEach((p, pi) => {
+    const nRows = 1 + 1 + p.ausstLines.length; // total EK row + profil row + ausst rows
+    const borderTop = pi > 0 ? 'border-top:2.5px solid #1e293b;' : '';
+    // Row 1: Gesamt-EK prominent + Profil
+    posHTML += `<tr style="${borderTop}">
+      <td rowspan="${nRows}" style="vertical-align:top;font-weight:700;${borderTop}">${p.pos}</td>
+      <td rowspan="${nRows}" style="vertical-align:top;${borderTop}">${p.stk}</td>
+      <td style="font-weight:700;${borderTop}">${p.profil}</td>
+      <td rowspan="${nRows}" style="vertical-align:top;${borderTop}">${p.breite}</td>
+      <td rowspan="${nRows}" style="vertical-align:top;${borderTop}">${p.hoehe}</td>
+      <td class="r" style="font-weight:700;font-size:12px;${borderTop};border-bottom:1px solid #94a3b8">${fmt(p.totalEK)}</td>
+      <td class="r" rowspan="${nRows}" style="vertical-align:top;${borderTop}">${fmtH(p.az)}</td>
+      <td class="r" rowspan="${nRows}" style="vertical-align:top;font-weight:700;${borderTop}">${fmt(p.totalEP)}</td>
+      <td class="r" rowspan="${nRows}" style="vertical-align:top;font-weight:700;font-size:12px;${borderTop}">${fmt(p.gp)}</td>
+    </tr>`;
+    // Row 2: Profil-EK
+    posHTML += `<tr>
+      <td style="color:#64748b;font-size:.72rem;padding-left:8px">Profil</td>
+      <td class="r" style="color:#2563eb;font-size:.72rem;font-weight:600">${fmt(p.profilEK)}</td>
+    </tr>`;
+    // Sub-rows: each Ausstattung EK
+    p.ausstLines.forEach(a => {
+      posHTML += `<tr>
+        <td style="color:#64748b;font-size:.72rem;padding-left:8px">+ ${a.name}</td>
+        <td class="r" style="color:#64748b;font-size:.72rem">${fmt(a.ek)}</td>
+      </tr>`;
+    });
+  });
+
+  const w = window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><title>Kalkulation Export</title>
+<style>
+  @page { size:A4 portrait; margin:18mm 14mm; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',system-ui,sans-serif;padding:30px 25px;color:#1e293b;font-size:11px}
+  h1{font-size:15px;margin-bottom:3px;letter-spacing:.02em}
+  .meta{color:#64748b;font-size:10px;margin-bottom:18px}
+  table{width:100%;border-collapse:collapse;margin-bottom:16px}
+  th{background:#1e293b;color:#fff;padding:6px 8px;text-align:left;font-weight:600;font-size:9px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+  td{padding:5px 8px;border-bottom:1px solid #e2e8f0;white-space:nowrap;font-size:11px}
+  .r{text-align:right}
+  .totals{display:flex;gap:20px;justify-content:flex-end;margin-top:14px}
+  .tb{text-align:right} .tb .l{font-size:9px;text-transform:uppercase;color:#64748b;letter-spacing:.04em} .tb .v{font-size:13px;font-weight:700}
+  hr{border:none;border-top:2.5px solid #1e293b;margin:14px 0}
+</style></head><body>
+  <h1>Kalkulation – Rollladen</h1>
+  <div class="meta">Erstellt am ${today}</div>
+  <table>
+    <thead><tr>
+      <th style="width:30px">Pos</th>
+      <th style="width:28px">Stk</th>
+      <th>Profil / Ausstattung</th>
+      <th style="width:52px" class="r">Breite</th>
+      <th style="width:48px" class="r">Höhe</th>
+      <th style="width:72px" class="r">EK</th>
+      <th style="width:52px" class="r">AZ</th>
+      <th style="width:72px" class="r">EP</th>
+      <th style="width:78px" class="r">GP</th>
+    </tr></thead>
+    <tbody>${posHTML}</tbody>
+  </table>
+  <hr>
+  <div class="totals">
+    <div class="tb"><div class="l">Gesamt EK</div><div class="v">${sumEK}</div></div>
+    <div class="tb"><div class="l">Gesamt AZ</div><div class="v">${sumAZ}</div></div>
+    <div class="tb"><div class="l">Gesamt EP</div><div class="v">${sumEP}</div></div>
+    <div class="tb"><div class="l">Gesamt GP</div><div class="v" style="font-size:15px">${sumGP}</div></div>
+  </div>
+</body></html>`);
+  w.document.close();
+  setTimeout(() => { w.focus(); w.print(); }, 400);
+}
+
+// ════════════ MOBILE CARDS ════════════
+function isMobile() { return window.innerWidth <= 860; }
+
+function renderMobileCards() {
+  if(!isMobile()) return;
+  const container = document.getElementById('mobileCards');
+  const rows = document.querySelectorAll('#tableBody tr');
+  container.innerHTML = '';
+
+  rows.forEach((tr, idx) => {
+    const posNum = idx + 1;
+    const profilSel = tr.querySelector('.profil-select');
+    const profilIdx = profilSel.value;
+    const breite = tr.querySelector('.breite-input').value || '';
+    const hoehe = tr.querySelector('.hoehe-input').value || '';
+    const stk = tr.querySelector('.stk-input').value || '1';
+
+    const ausstHTML = buildAusstOptions();
+    const profilHTML = buildProfilOptions();
+
+    let ausstSelects = '';
+    for(let n=1; n<=5; n++) {
+      const val = tr.querySelector(`.a${n}`).value;
+      ausstSelects += `<select class="ausst-select" data-row="${idx}" data-ausst="${n}">${ausstHTML}</select>`;
+    }
+
+    // Get result values from table row
+    const ekEl = tr.querySelector('[data-ek]');
+    const ekHTML = ekEl ? ekEl.innerHTML : '–';
+    const az = tr.querySelector('[data-az]')?.textContent || '–';
+    const ep = tr.querySelector('[data-ep]')?.textContent || '–';
+    const gp = tr.querySelector('[data-gp]')?.textContent || '–';
+
+    // Extract just the total EK for the prominent display
+    const ekTotalEl = ekEl?.querySelector('.ek-total');
+    const ekTotal = ekTotalEl ? ekTotalEl.textContent : '–';
+    const ekDetailEl = ekEl?.querySelector('.ek-detail');
+    const ekDetail = ekDetailEl ? ekDetailEl.innerHTML : '';
+
+    const card = document.createElement('div');
+    card.className = 'm-card';
+    card.dataset.rowIdx = idx;
+    card.innerHTML = `
+      <div class="m-card-header">
+        <span style="display:flex;align-items:center;gap:8px">
+          <span class="pos-badge">${posNum}</span>
+          <span style="font-weight:600;font-size:.88rem">Position ${posNum}</span>
+        </span>
+        <button type="button" class="btn btn-remove" style="color:#fff;opacity:.7;font-size:1.3rem;min-width:44px;min-height:44px" data-remove-idx="${idx}">✕</button>
+      </div>
+      <div class="m-card-body">
+        <div class="m-row">
+          <label>Profil</label>
+          <select data-row="${idx}" data-field="profil">${profilHTML}</select>
+        </div>
+        <div class="m-stk-row">
+          <label>Stück</label>
+          <input type="number" min="1" value="${stk}" data-row="${idx}" data-field="stk">
+        </div>
+        <div class="m-masse">
+          <div>
+            <label>Breite (mm)</label>
+            <input type="number" class="mass-input" placeholder="Breite" value="${breite}" data-row="${idx}" data-field="breite">
+          </div>
+          <div>
+            <label>Höhe (mm)</label>
+            <input type="number" class="mass-input" placeholder="Höhe" value="${hoehe}" data-row="${idx}" data-field="hoehe">
+          </div>
+        </div>
+        <div class="m-ausst">
+          <label>Ausstattungen</label>
+          ${ausstSelects}
+        </div>
+        <div class="m-results">
+          <div class="m-result-box ek">
+            <div class="m-r-label">EK</div>
+            <div class="m-r-value">${ekTotal}</div>
+            ${ekDetail ? '<div class="m-ek-detail">'+ekDetail+'</div>' : ''}
+          </div>
+          <div class="m-result-box az">
+            <div class="m-r-label">AZ</div>
+            <div class="m-r-value">${az}</div>
+          </div>
+          <div class="m-result-box ep">
+            <div class="m-r-label">EP</div>
+            <div class="m-r-value">${ep}</div>
+          </div>
+          <div class="m-result-box gp">
+            <div class="m-r-label">Gesamtpreis</div>
+            <div class="m-r-value">${gp}</div>
+          </div>
+        </div>
+      </div>`;
+
+    container.appendChild(card);
+
+    // Set dropdown values after DOM insertion
+    const cardProfilSel = card.querySelector('[data-field="profil"]');
+    if(cardProfilSel) cardProfilSel.value = profilIdx;
+    for(let n=1; n<=5; n++) {
+      const cardAusst = card.querySelector(`[data-ausst="${n}"]`);
+      const origVal = tr.querySelector(`.a${n}`).value;
+      if(cardAusst) {
+        cardAusst.value = origVal;
+        if(origVal) cardAusst.classList.add('ausst-filled');
+      }
+    }
+  });
+}
+
+function mobileSync(el) {
+  const rowIdx = parseInt(el.dataset.row);
+  const rows = document.querySelectorAll('#tableBody tr');
+  const tr = rows[rowIdx];
+  if(!tr) return;
+
+  const field = el.dataset.field;
+  const ausstN = el.dataset.ausst;
+
+  if(field === 'profil') tr.querySelector('.profil-select').value = el.value;
+  else if(field === 'breite') tr.querySelector('.breite-input').value = el.value;
+  else if(field === 'hoehe') tr.querySelector('.hoehe-input').value = el.value;
+  else if(field === 'stk') tr.querySelector('.stk-input').value = el.value;
+  else if(ausstN) {
+    tr.querySelector(`.a${ausstN}`).value = el.value;
+    if(el.value) el.classList.add('ausst-filled');
+    else el.classList.remove('ausst-filled');
+  }
+
+  _baseRecalcDirect();
+  renderMobileCards();
+}
+
+function mobileRemove(idx) {
+  const rows = document.querySelectorAll('#tableBody tr');
+  if(rows[idx]) rows[idx].remove();
+  renumberRows();
+  _baseRecalcDirect();
+  renderMobileCards();
+}
+
+// Delegated event listeners for mobile cards (iOS touch-safe)
+document.getElementById('mobileCards').addEventListener('change', e => {
+  const el = e.target;
+  if(el.dataset.field || el.dataset.ausst) mobileSync(el);
+});
+document.getElementById('mobileCards').addEventListener('input', e => {
+  const el = e.target;
+  if(el.dataset.field) mobileSync(el);
+});
+document.getElementById('mobileCards').addEventListener('click', e => {
+  const btn = e.target.closest('[data-remove-idx]');
+  if(btn) { e.preventDefault(); mobileRemove(parseInt(btn.dataset.removeIdx)); }
+});
+
+// ════════════ DRAG & DROP ════════════
+let dragRow = null;
+let dropPosition = null; // 'above' or 'below'
+
+function clearDragClasses() {
+  document.querySelectorAll('#tableBody tr').forEach(r => {
+    r.classList.remove('drag-insert-above', 'drag-insert-below');
+  });
+}
+
+document.getElementById('tableBody').addEventListener('dragstart', e => {
+  const tr = e.target.closest('tr');
+  if(!tr) return;
+  dragRow = tr;
+  tr.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', '');
+});
+
+document.getElementById('tableBody').addEventListener('dragend', e => {
+  const tr = e.target.closest('tr');
+  if(tr) tr.classList.remove('dragging');
+  clearDragClasses();
+  dragRow = null;
+  dropPosition = null;
+});
+
+document.getElementById('tableBody').addEventListener('dragover', e => {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  const tr = e.target.closest('tr');
+  if(!tr || tr === dragRow) { clearDragClasses(); return; }
+
+  // Determine if cursor is in top or bottom half of the row
+  const rect = tr.getBoundingClientRect();
+  const midY = rect.top + rect.height / 2;
+  clearDragClasses();
+  if(e.clientY < midY) {
+    tr.classList.add('drag-insert-above');
+    dropPosition = 'above';
+  } else {
+    tr.classList.add('drag-insert-below');
+    dropPosition = 'below';
+  }
+});
+
+document.getElementById('tableBody').addEventListener('dragleave', e => {
+  // Only clear if leaving the tbody entirely
+  const related = e.relatedTarget;
+  if(!related || !document.getElementById('tableBody').contains(related)) {
+    clearDragClasses();
+  }
+});
+
+document.getElementById('tableBody').addEventListener('drop', e => {
+  e.preventDefault();
+  const tr = e.target.closest('tr');
+  if(!tr || !dragRow || tr === dragRow) return;
+  const tbody = document.getElementById('tableBody');
+  if(dropPosition === 'above') {
+    tbody.insertBefore(dragRow, tr);
+  } else {
+    tbody.insertBefore(dragRow, tr.nextSibling);
+  }
+  clearDragClasses();
+  renumberRows();
+  recalc();
+});
+
+// Make rows draggable via handle only
+document.getElementById('tableBody').addEventListener('mousedown', e => {
+  const handle = e.target.closest('.drag-handle');
+  if(handle) handle.closest('tr').setAttribute('draggable', 'true');
+});
+document.getElementById('tableBody').addEventListener('mouseup', e => {
+  document.querySelectorAll('#tableBody tr').forEach(r => r.removeAttribute('draggable'));
+});
+
+// ════════════ KEYBOARD NAVIGATION ════════════
+document.getElementById('calcTable').addEventListener('keydown', e => {
+  if(e.key === 'Enter' && !e.shiftKey) {
+    const el = e.target;
+    if(el.tagName !== 'INPUT' && el.tagName !== 'SELECT') return;
+    e.preventDefault();
+
+    const currentTr = el.closest('tr');
+    const currentTd = el.closest('td');
+    if(!currentTr || !currentTd) return;
+
+    // Find column index of current cell
+    const cells = [...currentTr.children];
+    const colIdx = cells.indexOf(currentTd);
+
+    // Find next row
+    const rows = [...document.querySelectorAll('#tableBody tr')];
+    const rowIdx = rows.indexOf(currentTr);
+    if(rowIdx < rows.length - 1) {
+      const nextRow = rows[rowIdx + 1];
+      const nextCell = nextRow.children[colIdx];
+      if(nextCell) {
+        const target = nextCell.querySelector('input, select');
+        if(target) target.focus();
+      }
+    }
+  }
+});
+
+// ════════════ INIT ════════════
+// Keep direct ref for mobile sync (avoids recursion)
+const _baseRecalcDirect = recalc;
+recalc = function() { _baseRecalcDirect(); renderMobileCards(); };
+
+// Listen for resize to toggle mobile/desktop
+window.addEventListener('resize', () => { renderMobileCards(); });
+
+addRow();
+</script>
+</body>
+</html>
