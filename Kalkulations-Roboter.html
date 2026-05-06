@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Kalkulator">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1e293b">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjM2IiBmaWxsPSIjMWUyOTNiIi8+PHRleHQgeD0iOTAiIHk9IjEwNSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjcwIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5LSzwvdGV4dD48L3N2Zz4=">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiS2Fsa3VsYXRpb25zLVJvYm90ZXIiLCJzaG9ydF9uYW1lIjoiS2Fsa3VsYXRvciIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwic3RhcnRfdXJsIjoiLiIsImJhY2tncm91bmRfY29sb3IiOiIjZjVmN2ZhIiwidGhlbWVfY29sb3IiOiIjMWUyOTNiIn0=">
+<title>Kalkulations-Roboter</title>
+<style>
+:root{--bg:#f5f7fa;--card:#fff;--primary:#2563eb;--primary-hover:#1d4ed8;--danger:#ef4444;--success:#10b981;--text:#1e293b;--text-muted:#64748b;--border:#cbd5e1;--border-light:#e2e8f0;--header-bg:#1e293b;--row-alt:#f8fafc;--shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);--radius:8px;--filled:#eff6ff;--filled-border:#bfdbfe;--cat-rollladen:#2563eb;--cat-reparatur:#8b5cf6;--cat-markisen:#0d9488;--cat-umruestung:#d97706;--cat-markisenumruestung:#e11d48;--cat-insektenschutz:#16a34a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);padding:20px;min-height:100vh}
+.app-header{text-align:center;margin-bottom:14px;position:relative}
+.app-header h1{font-size:1.6rem;font-weight:700;color:var(--header-bg)}
+.app-header p{color:var(--text-muted);margin-top:3px;font-size:.85rem}
+.btn-stamm{position:absolute;right:0;top:50%;transform:translateY(-50%);border:1px solid var(--border);background:var(--card);color:var(--text-muted);padding:6px 14px;font-size:.78rem;font-weight:600;cursor:pointer;border-radius:6px;transition:all .15s;white-space:nowrap}
+.btn-stamm:hover{border-color:var(--primary);color:var(--primary);background:#eef2ff}
+.btn-stamm.active{background:var(--header-bg);color:#fff;border-color:var(--header-bg)}
+.view{display:none}.view.active{display:block}
+.summary-bar{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+.summary-card{background:var(--card);border-radius:var(--radius);padding:12px 22px;box-shadow:var(--shadow);text-align:center;min-width:140px}
+.summary-card .label{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:3px}
+.summary-card .value{font-size:1.25rem;font-weight:700}
+.summary-card .value.ek{color:var(--primary)}.summary-card .value.az{color:#8b5cf6}
+.summary-card .value.ep{color:var(--success)}.summary-card .value.gp{color:var(--header-bg)}
+.summary-name-card{min-width:180px}
+.kalk-name-input{width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:1rem;font-weight:700;text-align:center;background:#fff;color:var(--text);margin-top:2px}
+.kalk-name-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+.kalk-name-input::placeholder{font-weight:400;color:var(--text-muted);font-size:.85rem}
+/* ── Group styles ── */
+.calc-group{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:20px;overflow:hidden;border-left:4px solid var(--primary)}
+.calc-group[data-cat="reparatur"]{border-left-color:var(--cat-reparatur)}
+.calc-group[data-cat="markisen"]{border-left-color:var(--cat-markisen)}
+.calc-group[data-cat="umruestung"]{border-left-color:var(--cat-umruestung)}
+.calc-group[data-cat="markisenumruestung"]{border-left-color:var(--cat-markisenumruestung)}
+.calc-group[data-cat="insektenschutz"]{border-left-color:var(--cat-insektenschutz)}
+.group-header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--row-alt);border-bottom:1px solid var(--border-light);flex-wrap:wrap}
+.group-title{font-size:1rem;font-weight:700;color:var(--header-bg);flex-shrink:0}
+.group-title[data-cat="reparatur"]{color:var(--cat-reparatur)}
+.group-title[data-cat="markisen"]{color:var(--cat-markisen)}
+.group-title[data-cat="umruestung"]{color:var(--cat-umruestung)}
+.group-title[data-cat="markisenumruestung"]{color:var(--cat-markisenumruestung)}
+.group-title[data-cat="insektenschutz"]{color:var(--cat-insektenschutz)}
+.group-summary{display:flex;gap:14px;flex:1;justify-content:flex-end;flex-wrap:wrap}
+.gs{font-size:.78rem;font-weight:600;white-space:nowrap}
+.gs.ek{color:var(--primary)}.gs.az{color:#8b5cf6}.gs.ep{color:var(--success)}.gs.gp{color:var(--header-bg);font-size:.88rem}
+.btn-remove-group{border:none;background:transparent;color:var(--danger);font-size:1.1rem;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:6px;flex-shrink:0}
+.btn-remove-group:hover{background:#fef2f2}
+.prev-az-row{display:inline-flex;align-items:center;gap:6px;margin-left:12px}
+.prev-az-label{font-size:.72rem;font-weight:600;color:var(--text-muted);white-space:nowrap}
+.prev-az-input{width:60px;border:1px solid var(--border);border-radius:5px;padding:4px 6px;font-size:.8rem;font-weight:700;text-align:center;background:#fff;color:#7c3aed}
+.prev-az-input:focus{outline:none;border-color:#8b5cf6;box-shadow:0 0 0 2px rgba(139,92,246,.15)}
+.prev-az-input::placeholder{font-weight:400;color:#c4b5fd;font-size:.72rem}
+.prev-az-detail{font-size:.65rem;color:var(--text-muted);white-space:nowrap}
+/* ── Table styles ── */
+.table-wrap{overflow-x:auto}
+table.calc{width:100%;border-collapse:collapse;font-size:.82rem;table-layout:fixed}
+table.calc thead th{background:var(--header-bg);color:#fff;padding:10px 6px;text-align:center;font-weight:600;font-size:.74rem;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;position:sticky;top:0;border-right:1px solid rgba(255,255,255,.12)}
+table.calc thead th:last-child{border-right:none}
+table.calc tbody td{padding:7px 5px;text-align:center;vertical-align:middle;border-bottom:1px solid var(--border-light);border-right:1px solid var(--border-light)}
+table.calc tbody td:last-child{border-right:none}
+table.calc tbody tr:hover{background:#f1f5f9}
+.c-pos{width:40px}.c-stk{width:50px}.c-profil{width:240px}.c-mass{width:95px}.c-ausst{width:140px}
+.c-az{width:62px}.c-ek{width:100px}.c-marge{width:70px}.c-vk{width:78px}.c-ep{width:78px}.c-gp{width:85px}
+.c-mass,.c-ausst{border-right:2px solid var(--border) !important}
+td.group-start{border-left:2px solid var(--border) !important}
+.mass-input{border:2px solid var(--primary) !important;border-radius:6px;padding:7px 6px;font-size:.9rem !important;font-weight:700 !important;text-align:center;background:#f0f7ff;color:var(--primary)}
+.mass-input:focus{background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.2)}
+.mass-input::placeholder{color:#93c5fd;font-weight:400}
+.mass-input.optional-dim{border-color:var(--border) !important;background:var(--row-alt);color:var(--text);font-weight:600 !important;font-size:.84rem !important}
+.mass-input.optional-dim:focus{border-color:var(--primary) !important;background:#fff}
+.mass-input.optional-dim::placeholder{color:var(--text-muted)}
+select,input[type=number]{border:1px solid var(--border-light);border-radius:5px;padding:5px 6px;font-size:.82rem;background:#fff;color:var(--text);transition:all .15s;width:100%;text-align:center}
+select:focus,input[type=number]:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+select.ausst-filled{background:var(--filled) !important;border-color:var(--filled-border) !important;color:var(--primary);font-weight:600}
+.result-cell{font-weight:600;font-size:.84rem;white-space:nowrap}
+.result-cell.ek{color:var(--primary)}.result-cell.az{color:#8b5cf6}
+.result-cell.vk{color:#0891b2}.result-cell.ep{color:var(--success)}
+.result-cell.gp{font-weight:700;color:var(--header-bg);font-size:.88rem}
+.ek-total{font-weight:700;font-size:.92rem;color:var(--primary);margin-bottom:4px;padding-bottom:3px;border-bottom:1px solid var(--border-light)}
+.ek-detail{font-size:.66rem;color:var(--text-muted);line-height:1.4}
+.ek-detail .ek-line{white-space:nowrap}
+.ek-detail .ek-profil{color:var(--primary);font-weight:600}
+.edit-input{width:100%;text-align:center;border:1px solid var(--border-light);border-radius:4px;padding:4px 2px;font-size:.8rem;font-weight:600;background:var(--row-alt);color:var(--text)}
+.edit-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(37,99,235,.15);background:#fff}
+.edit-input.field-override{border:2px solid var(--primary);background:#eff6ff;color:var(--primary)}
+.edit-input.az-input{color:#8b5cf6}.edit-input.az-input.field-override{border-color:#8b5cf6;background:#f5f3ff;color:#7c3aed}
+.edit-input.marge-input{color:#d97706}.edit-input.marge-input.field-override{border-color:#d97706;background:#fffbeb;color:#b45309}
+.edit-input.ep-input{color:var(--success)}.edit-input.ep-input.field-override{border-color:var(--success);background:#ecfdf5;color:#059669}
+.edit-input.field-zero{border:2px solid var(--danger) !important;background:#fef2f2 !important;color:var(--danger) !important}
+.profil-text{border:1px solid var(--border-light);border-radius:5px;padding:5px 8px;font-size:.82rem;background:#fff;color:var(--text);width:100%;text-align:left}
+.profil-text:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+.btn{border:none;cursor:pointer;border-radius:6px;font-weight:600;transition:all .15s;display:inline-flex;align-items:center;justify-content:center}
+.btn-add{background:var(--primary);color:#fff;padding:9px 18px;font-size:.86rem;gap:5px}
+.btn-add:hover{background:var(--primary-hover);transform:translateY(-1px);box-shadow:0 4px 12px rgba(37,99,235,.3)}
+.btn-dup{background:#8b5cf6;color:#fff;padding:9px 18px;font-size:.86rem;gap:5px}
+.btn-dup:hover{background:#7c3aed;transform:translateY(-1px);box-shadow:0 4px 12px rgba(139,92,246,.3)}
+.btn-remove{background:transparent;color:var(--danger);font-size:1rem;width:28px;height:28px;padding:0}
+.btn-remove:hover{background:#fef2f2}
+.btn-reset{background:transparent;color:var(--text-muted);font-size:.85rem;width:28px;height:28px;padding:0;border:1px solid var(--border-light);border-radius:4px;margin-right:2px}
+.btn-reset:hover{background:#f0f7ff;color:var(--primary);border-color:var(--primary)}
+.btn-reset.has-overrides{color:var(--primary);border-color:var(--filled-border);background:var(--filled)}
+.btn-export{background:var(--header-bg);color:#fff;padding:12px 22px;font-size:.9rem;gap:5px;box-shadow:0 4px 16px rgba(0,0,0,.25);border-radius:8px}
+.btn-export:hover{background:#0f172a;transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.group-actions{display:flex;gap:10px;justify-content:flex-start;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--border-light)}
+.global-actions{position:fixed;bottom:24px;right:24px;z-index:50}
+.ausst-select{font-size:.76rem;padding:5px 3px}
+.pos-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--primary);color:#fff;width:24px;height:24px;border-radius:50%;font-weight:700;font-size:.76rem}
+table.calc tbody tr.pos-separator td{border-bottom:3px solid var(--primary) !important}
+.row-check{width:16px;height:16px;cursor:pointer;accent-color:var(--primary)}
+tr.row-selected{background:#eff6ff !important}tr.row-selected td{background:inherit}
+.drag-handle{cursor:grab;color:var(--text-muted);font-size:1rem;user-select:none;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:4px;transition:all .12s}
+.drag-handle:hover{background:var(--border-light);color:var(--text)}.drag-handle:active{cursor:grabbing}
+tr.dragging{opacity:.35;background:#dbeafe !important}
+tr.drag-insert-above td{border-top:4px solid var(--primary) !important}
+tr.drag-insert-below td{border-bottom:4px solid var(--primary) !important}
+/* ── Add Group Bar ── */
+.add-group-bar{text-align:left;margin:16px 0}
+.add-group-wrapper{display:inline-block;position:relative}
+.btn-add-group{border:2px dashed var(--border);background:var(--card);color:var(--text-muted);padding:12px 28px;font-size:.9rem;font-weight:600;cursor:pointer;border-radius:var(--radius);transition:all .15s}
+.btn-add-group:hover{border-color:var(--primary);color:var(--primary);background:#eef2ff}
+.add-group-menu{position:absolute;top:100%;left:0;margin-top:6px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 8px 24px rgba(0,0,0,.12);overflow:hidden;min-width:220px;z-index:10}
+.add-group-option{display:block;width:100%;border:none;background:transparent;padding:12px 18px;font-size:.88rem;font-weight:600;color:var(--text);cursor:pointer;text-align:left;transition:background .1s}
+.add-group-option:hover{background:#f0f7ff;color:var(--primary)}
+.add-group-option .ago-sub{font-size:.72rem;font-weight:400;color:var(--text-muted);display:block;margin-top:1px}
+/* ── Stammdaten ── */
+.sd-section{margin-bottom:28px}
+.sd-section h2{font-size:1rem;font-weight:700;color:var(--header-bg);margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--primary)}
+.sd-section h2.cat-reparatur{border-color:var(--cat-reparatur)}.sd-section h2.cat-markisen{border-color:var(--cat-markisen)}.sd-section h2.cat-umruestung{border-color:var(--cat-umruestung)}.sd-section h2.cat-markisenumruestung{border-color:var(--cat-markisenumruestung)}.sd-section h2.cat-insektenschutz{border-color:var(--cat-insektenschutz)}
+.sd-table{max-width:900px}
+.sd-table input[type=number]{width:90px;text-align:right;font-weight:600}
+.sd-table input[type=text]{border:1px solid var(--border-light);border-radius:6px;padding:6px 8px;font-size:.84rem;background:#fff;color:var(--text);width:100%}
+.sd-table input[type=text]:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+.sd-table td{text-align:left;padding:5px 8px}.sd-table td:not(:first-child){text-align:right}
+.sd-add-row{margin-top:8px}
+.sd-btn-sm{border:none;cursor:pointer;border-radius:4px;font-size:.78rem;font-weight:600;padding:4px 10px;transition:all .15s}
+.sd-btn-add{background:var(--primary);color:#fff}.sd-btn-add:hover{background:var(--primary-hover)}
+.sd-btn-del{background:transparent;color:var(--danger);font-size:.9rem}.sd-btn-del:hover{background:#fef2f2}
+.sd-info{background:#eef2ff;border-radius:6px;padding:12px 16px;margin-bottom:20px;font-size:.84rem;color:var(--primary);line-height:1.5}
+.avail-toggle{cursor:pointer;font-weight:700;font-size:.9rem;text-align:center !important;width:40px;user-select:none;transition:color .1s}
+.avail-toggle.on{color:var(--success)}.avail-toggle.off{color:var(--border)}
+.avail-toggle:hover{background:#f0f7ff}
+button,select,input,.btn,a{touch-action:manipulation;-webkit-tap-highlight-color:rgba(37,99,235,.15)}
+/* ── Mobile ── */
+#mobileCardsAll{display:none}
+.m-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden;border:1px solid var(--border-light)}
+.m-card-header{background:var(--header-bg);color:#fff;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+.m-card-header .pos-badge{background:rgba(255,255,255,.2)}
+.m-card-body{padding:12px 14px}
+.m-row{display:flex;gap:8px;margin-bottom:8px;align-items:center}
+.m-row label{font-size:.72rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;min-width:60px;flex-shrink:0}
+.m-row select,.m-row input{flex:1;font-size:16px;padding:10px 12px;min-height:48px;touch-action:manipulation;-webkit-appearance:none;appearance:none;border-radius:8px}
+.m-row select{background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 12px center;padding-right:32px}
+.m-row .mass-input{font-size:18px !important;padding:12px !important}
+.m-masse{display:flex;gap:8px;margin-bottom:10px}.m-masse>div{flex:1}
+.m-masse label{display:block;font-size:.7rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px}
+.m-ausst{margin-bottom:10px}
+.m-ausst label{display:block;font-size:.7rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px}
+.m-ausst select{width:100%;font-size:16px;padding:8px 10px;min-height:40px;margin-bottom:4px;touch-action:manipulation;-webkit-appearance:none;appearance:none;border-radius:8px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 12px center;padding-right:32px}
+.m-results{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;padding-top:10px;border-top:2px solid var(--border-light)}
+.m-result-box{text-align:center;padding:6px;border-radius:6px;background:var(--row-alt)}
+.m-result-box .m-r-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);margin-bottom:2px}
+.m-result-box .m-r-value{font-size:0.95rem;font-weight:700}
+.m-result-box.ek .m-r-value{color:var(--primary)}
+.m-result-box.az .m-r-value{color:#8b5cf6}
+.m-result-box.vk .m-r-value{color:#0891b2}
+.m-result-box.marge .m-r-value{color:#d97706}
+.m-result-box.ep .m-r-value{color:var(--success)}
+.m-result-box.gp .m-r-value{color:var(--header-bg);font-size:1.15rem}
+.m-result-box.gp{grid-column:1/-1;background:#f0f7ff}
+.m-ek-detail{font-size:.7rem;color:var(--text-muted);margin-top:4px;line-height:1.35;text-align:left;padding:0 4px}
+.m-stk-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.m-stk-row label{font-size:.72rem;font-weight:600;color:var(--text-muted);text-transform:uppercase}
+.m-stk-row input{width:80px;font-size:16px;padding:10px;text-align:center;min-height:48px;touch-action:manipulation;border-radius:8px}
+.m-edit-row{display:flex;gap:6px;margin-top:8px;margin-bottom:6px}
+.m-edit-box{flex:1;text-align:center}
+.m-edit-box label{display:block;font-size:.65rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px}
+.m-edit-box input{width:100%;font-size:16px;padding:8px;text-align:center;min-height:44px;touch-action:manipulation;border-radius:8px}
+.m-reset-row{text-align:center;margin-top:6px}
+.m-btn-reset{border:1px solid var(--border);background:var(--card);color:var(--text-muted);padding:8px 16px;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;min-height:44px;touch-action:manipulation}
+.m-btn-reset:hover,.m-btn-reset:active{background:#f0f7ff;color:var(--primary);border-color:var(--primary)}
+.m-btn-reset.has-overrides{color:var(--primary);border-color:var(--filled-border);background:var(--filled)}
+.m-group-header{background:var(--header-bg);color:#fff;padding:10px 14px;border-radius:var(--radius) var(--radius) 0 0;font-weight:700;font-size:.92rem;margin-top:16px}
+.m-group-header:first-child{margin-top:0}
+@media(max-width:860px){
+  body{padding:12px 8px;-webkit-text-size-adjust:100%}
+  .app-header h1{font-size:1.3rem}.app-header p{font-size:.78rem}
+  .btn-stamm{padding:5px 10px;font-size:.72rem;top:4px;transform:none;right:4px}
+  .summary-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .summary-card{padding:10px 14px;min-width:0}.summary-card .value{font-size:1.1rem}
+  .table-wrap{display:none}.group-actions{display:none !important}#mobileCardsAll{display:block !important}
+  .group-actions{flex-direction:column;gap:8px}.group-actions .btn{width:100%;padding:14px;font-size:.95rem;min-height:48px}
+  .global-actions{position:static;flex-direction:column;gap:8px;padding:16px 8px;margin-top:12px}.global-actions .btn{width:100%;padding:14px;font-size:.95rem;min-height:48px}
+  .group-header{flex-direction:column;gap:6px;align-items:flex-start}
+  .group-summary{justify-content:flex-start}
+  .sd-table{max-width:100%}.sd-table input[type=number]{width:70px}.sd-table input[type=text]{font-size:.8rem}.sd-section h2{font-size:.92rem}
+}
+@media print{
+  body{padding:10px;background:#fff}
+  .btn,.group-actions,.global-actions,select,input,.no-print,.btn-stamm,.add-group-bar{display:none !important}
+  .summary-bar{display:none}#mobileCardsAll{display:none !important}.table-wrap{display:block !important}
+}
+</style>
+</head>
+<body>
+<div class="app-header">
+  <h1>Kalkulations-Roboter</h1>
+  <p>Angebotsvorlagen schnell zusammenklicken</p>
+  <button type="button" class="btn-stamm" id="btnStamm" onclick="toggleStamm()">⚙ Stammdaten</button>
+</div>
+
+<div id="viewCalc" class="view active">
+<div class="summary-bar">
+  <div class="summary-card summary-name-card"><div class="label">Name / Projekt</div><input type="text" id="kalkName" class="kalk-name-input" placeholder="z. B. Müller"></div>
+  <div class="summary-card"><div class="label">Gesamt EK</div><div class="value ek" id="sumEK">0,00 €</div></div>
+  <div class="summary-card"><div class="label">Gesamt AZ</div><div class="value az" id="sumAZ">0,00 h</div></div>
+  <div class="summary-card"><div class="label">Gesamt EP</div><div class="value ep" id="sumEP">0,00 €</div></div>
+  <div class="summary-card"><div class="label">Gesamt GP</div><div class="value gp" id="sumGP">0,00 €</div></div>
+</div>
+
+<div id="groupsContainer"></div>
+<div id="mobileCardsAll"></div>
+
+<div class="add-group-bar" id="addGroupBar">
+  <div class="add-group-wrapper">
+    <button type="button" class="btn-add-group" onclick="toggleAddMenu()">＋ Bereich hinzufügen</button>
+    <div class="add-group-menu" id="addGroupMenu" style="display:none"></div>
+  </div>
+</div>
+
+<div class="global-actions no-print">
+  <button type="button" class="btn btn-export" onclick="exportPDF()">📄 PDF Export</button>
+</div>
+</div>
+
+<div id="viewStamm" class="view"></div>
+
+<script>
+// ════════════ DATA ════════════
+const CATEGORIES = {
+  rollladen: {
+    label:'Rollladenerneuerung', shortLabel:'Erneu.', profilLabel:'Profil', profilTitle:'Profilpreise (pro m²)',
+    profilType:'dropdown', hasProfile:true, hasAzTable:true, hasPrevAZ:true,
+    azTitle:'Arbeitszeiten (nach Rollladengröße)', breiteLabel:'Breite (mm)', hoeheLabel:'Höhe (mm)', hasHoehe:true,
+    profile:[
+      {name:"Müller PVC",ek:16.17,vk:75},{name:"Müller PVC Sonderf.",ek:17.27,vk:75},
+      {name:"Müller PVC Sonderf. + Endleiste Sonderf. Kollektion",ek:19.14,vk:85},
+      {name:"Müller PVC Sonderf. + Endleiste Sonderf. RAL",ek:23.87,vk:85},
+      {name:"Müller Alu",ek:32.45,vk:110},{name:"Müller Alu Sonderf.",ek:34.65,vk:110},
+      {name:"Müller Alu Sonderf. + Endleiste Sonderf. Kollektion",ek:36.85,vk:120},
+      {name:"Müller Alu Sonderf. + Endleiste Sonderf. RAL",ek:41.25,vk:120},
+      {name:"Roma Alu Standardf.",ek:44,vk:130},{name:"Warema Alu Standardf.",ek:44,vk:130},
+      {name:"Alulux Alu Standardf.",ek:44,vk:130}
+    ],
+    azTable:[{label:"bis 3 m²",maxQm:3,az:2.5},{label:"bis 6 m²",maxQm:6,az:3},{label:"bis 8 m²",maxQm:8,az:3.5},{label:"größer als 8 m²",maxQm:Infinity,az:4}]
+  },
+  reparatur: {
+    label:'Rollladenreparatur', shortLabel:'Repar.', profilLabel:'Beschreibung', profilTitle:'',
+    profilType:'text', hasProfile:false, hasAzTable:false, hasPrevAZ:true,
+    azTitle:'', breiteLabel:'Breite (mm)', hoeheLabel:'Höhe (mm)', hasHoehe:true,
+    profile:[], azTable:[]
+  },
+  umruestung: {
+    label:'Rollladenumrüstung', shortLabel:'Umrüst.', profilLabel:'Beschreibung', profilTitle:'',
+    profilType:'text', hasProfile:false, hasAzTable:false, hasPrevAZ:true,
+    azTitle:'', breiteLabel:'Breite (mm)', hoeheLabel:'Höhe (mm)', hasHoehe:true,
+    profile:[], azTable:[]
+  },
+  markisenumruestung: {
+    label:'Markisenumrüstung', shortLabel:'M.Umr.', profilLabel:'Beschreibung', profilTitle:'',
+    profilType:'text', hasProfile:false, hasAzTable:false, hasPrevAZ:true,
+    azTitle:'', breiteLabel:'Breite (mm)', hoeheLabel:'Ausfall (mm)', hasHoehe:true,
+    profile:[], azTable:[]
+  },
+  markisen: {
+    label:'Neubespannung Markisen', shortLabel:'Markis.', profilLabel:'Tuch', profilTitle:'Tuchpreise (pro m²)',
+    profilType:'dropdown', hasProfile:true, hasAzTable:true, hasPrevAZ:true,
+    azTitle:'Arbeitszeiten (nach Markisengröße)', breiteLabel:'Breite (mm)', hoeheLabel:'Ausfall (mm)', hasHoehe:true,
+    profile:[
+      {name:"sunsilk/sunvas/sunbow",ek:32,vk:75},{name:"perla FR",ek:39.22,vk:85},
+      {name:"perfotex",ek:32,vk:75},{name:"vuscreen ALU",ek:33.61,vk:80},
+      {name:"transolair",ek:39.22,vk:85},{name:"Soltis Perform 92",ek:53.5,vk:110},
+      {name:"Balkonbesp. sunsilk/sunvas/sunbow",ek:39.5,vk:85},{name:"Balkonbesp. perla FR",ek:48.61,vk:105},
+      {name:"Balkonbesp. Perfotex",ek:39.5,vk:85},{name:"Balkonbesp. vuscreen ALU",ek:41.22,vk:90},
+      {name:"Balkonbesp. transolair",ek:48.61,vk:105},{name:"Balkonbesp. Soltis Perform 92",ek:67.83,vk:150}
+    ],
+    azTable:[{label:"bis 4 m²",maxQm:4,az:3.5},{label:"bis 6 m²",maxQm:6,az:4},{label:"bis 8 m²",maxQm:8,az:4.5},{label:"bis 12 m²",maxQm:12,az:5},{label:"bis 16 m²",maxQm:16,az:6},{label:"bis 20 m²",maxQm:20,az:7},{label:"bis 30 m²",maxQm:30,az:8},{label:"größer als 30 m²",maxQm:Infinity,az:10}]
+  },
+  insektenschutz: {
+    label:'Insektenschutzneubespannung', shortLabel:'Insekt.', profilLabel:'Gewebe', profilTitle:'Gewebepreise (pro m²)',
+    profilType:'dropdown', hasProfile:true, hasAzTable:true, hasPrevAZ:true,
+    azTitle:'Arbeitszeiten (nach Größe)', breiteLabel:'Breite (mm)', hoeheLabel:'Höhe (mm)', hasHoehe:true,
+    profile:[
+      {name:"Insektenschutzgewebe Standard",ek:15,vk:65}
+    ],
+    azTable:[{label:"bis 2 m²",maxQm:2,az:2},{label:"bis 4 m²",maxQm:4,az:2.5},{label:"bis 6 m²",maxQm:6,az:3},{label:"größer als 6 m²",maxQm:Infinity,az:3.5}]
+  }
+};
+
+let AUSST_BREITE=[
+  {name:"Stahlwelle",ek:4,vk:14,avail:{rollladen:true,reparatur:true,umruestung:true,markisenumruestung:false,markisen:false,insektenschutz:false}},
+  {name:"Rollladenkastendeckel",ek:5,vk:17.50,avail:{rollladen:true,reparatur:true,umruestung:true,markisenumruestung:false,markisen:false,insektenschutz:false}},
+  {name:"Abrollprofil",ek:6,vk:21,avail:{rollladen:true,reparatur:true,umruestung:true,markisenumruestung:false,markisen:false,insektenschutz:false}},
+  {name:"Volant 20 cm",ek:14.44,vk:35,avail:{rollladen:false,reparatur:false,umruestung:false,markisenumruestung:true,markisen:true,insektenschutz:false}},
+  {name:"Volant 30 cm",ek:17.78,vk:40,avail:{rollladen:false,reparatur:false,umruestung:false,markisenumruestung:true,markisen:true,insektenschutz:false}}
+];
+let AUSST_HOEHE=[
+  {name:"Führungsschienen Flock",ek:6,vk:21,avail:{rollladen:true,reparatur:true,umruestung:true,markisenumruestung:false,markisen:false,insektenschutz:false}},
+  {name:"Führungsschienen Pinto",ek:7,vk:24.50,avail:{rollladen:true,reparatur:true,umruestung:true,markisenumruestung:false,markisen:false,insektenschutz:false}},
+  {name:"Führungsschienen Oberteil",ek:7,vk:24.50,avail:{rollladen:true,reparatur:true,umruestung:true,markisenumruestung:false,markisen:false,insektenschutz:false}},
+  {name:"Einputzzarge",ek:5,vk:17.50,avail:{rollladen:true,reparatur:true,umruestung:true,markisenumruestung:false,markisen:false,insektenschutz:false}}
+];
+let AUSST_STUECK=[
+  {name:"Elektromotor",ek:60,vk:245,avail:{rollladen:true,reparatur:true,umruestung:true,markisenumruestung:false,markisen:false,insektenschutz:false}},
+  {name:"Funkmotor",ek:120,vk:285,avail:{rollladen:true,reparatur:true,umruestung:true,markisenumruestung:false,markisen:false,insektenschutz:false}},
+  {name:"Funk Handsender",ek:40,vk:85,avail:{rollladen:true,reparatur:true,umruestung:true,markisenumruestung:false,markisen:false,insektenschutz:false}},
+  {name:"Funk Wandsender",ek:40,vk:85,avail:{rollladen:true,reparatur:true,umruestung:true,markisenumruestung:false,markisen:false,insektenschutz:false}},
+  {name:"Gurtwickler",ek:3,vk:17,avail:{rollladen:false,reparatur:true,umruestung:true,markisenumruestung:false,markisen:false,insektenschutz:false}},
+  {name:"Gurt",ek:3,vk:18,avail:{rollladen:false,reparatur:true,umruestung:true,markisenumruestung:false,markisen:false,insektenschutz:false}},
+  {name:"Aufhänger Federbügel",ek:1,vk:4,avail:{rollladen:false,reparatur:true,umruestung:true,markisenumruestung:false,markisen:false,insektenschutz:false}},
+  {name:"Gliederaufhänger",ek:4,vk:12,avail:{rollladen:false,reparatur:true,umruestung:true,markisenumruestung:false,markisen:false,insektenschutz:false}},
+  {name:"Elektromotor 85 NM",ek:250,vk:550,avail:{rollladen:false,reparatur:false,umruestung:false,markisenumruestung:true,markisen:true,insektenschutz:false}},
+  {name:"Funkmotor 85 NM",ek:325,vk:715,avail:{rollladen:false,reparatur:false,umruestung:false,markisenumruestung:true,markisen:true,insektenschutz:false}}
+];
+
+let stundensatz=110;
+let activeGroups=new Set();
+
+// ════════════ HELPERS ════════════
+function fmt(v){return v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';}
+function fmtH(v){return v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' h';}
+function fmtP(v){return v.toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1})+' %';}
+function getAZ(catKey,qm){const t=CATEGORIES[catKey].azTable;if(!t||t.length===0)return 0;for(const r of t){if(qm<=r.maxQm)return r.az;}return t[t.length-1].az;}
+
+function buildAusstOptions(catKey){
+  let h='<option value="">– keine –</option>';
+  const bItems=AUSST_BREITE.filter(a=>a.avail[catKey]);
+  const hItems=AUSST_HOEHE.filter(a=>a.avail[catKey]);
+  const sItems=AUSST_STUECK.filter(a=>a.avail[catKey]);
+  if(bItems.length){h+='<optgroup label="nach Breite">';bItems.forEach(a=>{const gi=AUSST_BREITE.indexOf(a);h+=`<option value="b_${gi}">${a.name}</option>`;});h+='</optgroup>';}
+  if(hItems.length){h+='<optgroup label="nach Höhe">';hItems.forEach(a=>{const gi=AUSST_HOEHE.indexOf(a);h+=`<option value="h_${gi}">${a.name}</option>`;});h+='</optgroup>';}
+  if(sItems.length){h+='<optgroup label="pro Stück">';sItems.forEach(a=>{const gi=AUSST_STUECK.indexOf(a);h+=`<option value="s_${gi}">${a.name}</option>`;});h+='</optgroup>';}
+  return h;
+}
+
+function buildProfilOptions(catKey){
+  const cat=CATEGORIES[catKey];
+  let h=`<option value="">– ${cat.profilLabel} wählen –</option>`;
+  cat.profile.forEach((p,i)=>h+=`<option value="${i}">${p.name}</option>`);return h;
+}
+
+function calcAusstDetail(val,breiteMm,hoeheMm){
+  if(!val)return null;
+  const[type,idx]=val.split('_');const i=parseInt(idx);
+  let item,mult;
+  if(type==='b'){item=AUSST_BREITE[i];mult=breiteMm/1000;}
+  else if(type==='h'){item=AUSST_HOEHE[i];mult=hoeheMm/1000;}
+  else{item=AUSST_STUECK[i];mult=1;}
+  if(!item)return null;
+  return{name:item.name,ek:item.ek*mult,vk:item.vk*mult};
+}
+
+function updateAusstStyles(container){(container||document).querySelectorAll('.ausst-select').forEach(s=>{if(s.value)s.classList.add('ausst-filled');else s.classList.remove('ausst-filled');})}
+
+// ════════════ VIEW SWITCHING ════════════
+function toggleStamm(){
+  const isStamm=document.getElementById('viewStamm').classList.contains('active');
+  if(isStamm){
+    syncFromStammdaten();
+    document.getElementById('viewStamm').classList.remove('active');
+    document.getElementById('viewCalc').classList.add('active');
+    const btn=document.getElementById('btnStamm');btn.textContent='⚙ Stammdaten';btn.classList.remove('active');
+    rebuildAllDropdowns();recalcAll();
+  }else{
+    document.getElementById('viewCalc').classList.remove('active');
+    document.getElementById('viewStamm').classList.add('active');
+    const btn=document.getElementById('btnStamm');btn.textContent='← Kalkulation';btn.classList.add('active');
+    renderStammdaten();
+  }
+}
+
+// ════════════ GROUP MANAGEMENT ════════════
+function addGroup(catKey){
+  if(activeGroups.has(catKey))return;
+  activeGroups.add(catKey);
+  const cat=CATEGORIES[catKey];
+  const g=document.createElement('div');
+  g.className='calc-group';g.dataset.cat=catKey;g.id='group-'+catKey;
+
+  let prevAZHTML='';
+  if(cat.hasPrevAZ){
+    prevAZHTML=`<div class="prev-az-row">
+      <span class="prev-az-label">Bish.&nbsp;Aufw.:</span>
+      <input type="number" class="prev-az-input" placeholder="0" min="0" step="0.5" oninput="recalcAll()" onchange="recalcAll()">
+      <span class="prev-az-detail"></span>
+    </div>`;
+  }
+
+  const hoeheCol=cat.hasHoehe?`<th class="c-mass">${cat.hoeheLabel}</th>`:'';
+  g.innerHTML=`
+    <div class="group-header">
+      <div class="group-title" data-cat="${catKey}">${cat.label}</div>
+      ${prevAZHTML}
+      <div class="group-summary">
+        <span class="gs ek">EK: 0,00 €</span>
+        <span class="gs az">AZ: 0,00 h</span>
+        <span class="gs ep">EP: 0,00 €</span>
+        <span class="gs gp">GP: 0,00 €</span>
+      </div>
+      <button type="button" class="btn-remove-group no-print" onclick="removeGroup('${catKey}')" title="Bereich entfernen">✕</button>
+    </div>
+    <div class="table-wrap">
+    <table class="calc">
+      <thead><tr>
+        <th style="width:28px" class="no-print"></th>
+        <th style="width:28px" class="no-print"></th>
+        <th class="c-pos">Pos</th>
+        <th class="c-stk">Stk</th>
+        <th class="c-profil">${cat.profilLabel}</th>
+        <th class="c-mass">${cat.breiteLabel}</th>
+        ${hoeheCol}
+        <th class="c-ausst">Ausst. 1</th><th class="c-ausst">Ausst. 2</th>
+        <th class="c-ausst">Ausst. 3</th><th class="c-ausst">Ausst. 4</th>
+        <th class="c-ausst">Ausst. 5</th>
+        <th class="c-az">AZ</th>
+        <th class="c-ek">EK</th>
+        <th class="c-marge">Marge %</th>
+        <th class="c-vk">VK</th>
+        <th class="c-ep">EP</th>
+        <th class="c-gp">GP</th>
+        <th style="width:64px" class="no-print"></th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+    </div>
+    <div class="group-actions no-print">
+      <button type="button" class="btn btn-add" onclick="addRow('${catKey}')">＋ Neue Position</button>
+      <button type="button" class="btn btn-dup" onclick="dupSelected('${catKey}')">⧉ Markierte duplizieren</button>
+    </div>`;
+
+  document.getElementById('groupsContainer').appendChild(g);
+  setupGroupDragDrop(g);
+  addRow(catKey);
+  updateAddMenu();
+  hideAddMenu();
+  recalcAll();renderMobileCards();
+}
+
+function removeGroup(catKey){
+  const g=document.getElementById('group-'+catKey);
+  if(g){
+    if(g.querySelector('tbody').children.length>0){
+      if(!confirm('Bereich "'+CATEGORIES[catKey].label+'" mit allen Positionen entfernen?'))return;
+    }
+    g.remove();
+  }
+  activeGroups.delete(catKey);
+  updateAddMenu();
+  recalcAll();renderMobileCards();
+}
+
+function toggleAddMenu(){
+  const menu=document.getElementById('addGroupMenu');
+  if(menu.style.display==='none'){menu.style.display='block';updateAddMenu();}
+  else menu.style.display='none';
+}
+function hideAddMenu(){document.getElementById('addGroupMenu').style.display='none';}
+
+function updateAddMenu(){
+  const menu=document.getElementById('addGroupMenu');
+  let h='';
+  for(const[k,c]of Object.entries(CATEGORIES)){
+    if(!activeGroups.has(k)){
+      h+=`<button type="button" class="add-group-option" onclick="addGroup('${k}')">${c.label}<span class="ago-sub">${c.hasProfile?c.profilLabel+'-basiert':'Manuelle Eingabe'}</span></button>`;
+    }
+  }
+  if(!h)h='<div style="padding:12px;color:var(--text-muted);font-size:.84rem;text-align:center">Alle Bereiche bereits hinzugefügt</div>';
+  menu.innerHTML=h;
+  // Hide add button if all groups active
+  document.getElementById('addGroupBar').style.display=activeGroups.size>=Object.keys(CATEGORIES).length?'none':'';
+}
+
+// Close menu on outside click
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.add-group-wrapper'))hideAddMenu();
+});
+
+// ════════════ ROW MANAGEMENT ════════════
+let rowCounters={};
+
+function createRowHTML(catKey,stk,breite,hoehe){
+  if(!rowCounters[catKey])rowCounters[catKey]=0;
+  rowCounters[catKey]++;
+  const cat=CATEGORIES[catKey];
+  const ah=buildAusstOptions(catKey);
+  const isText=cat.profilType==='text';
+  const optionalDim=!cat.hasProfile;
+  const dimClass=optionalDim?'mass-input optional-dim':'mass-input';
+  let profilCell;
+  if(isText){profilCell=`<input type="text" class="profil-select profil-text" placeholder="z.B. RL Küche" value="">`;}
+  else{profilCell=`<select class="profil-select" onchange="recalcAll()">${buildProfilOptions(catKey)}</select>`;}
+  const hoeheCell=cat.hasHoehe?`<td><input type="number" min="0" placeholder="${optionalDim?'optional':cat.hoeheLabel.replace(' (mm)','')}" value="${hoehe||''}" class="hoehe-input ${dimClass}" onchange="recalcAll()" oninput="recalcAll()"></td>`:'';
+  return `
+    <td class="no-print"><input type="checkbox" class="row-check" onchange="updateRowSelection(this)"></td>
+    <td class="no-print"><span class="drag-handle" title="Verschieben">☰</span></td>
+    <td><span class="pos-badge">${rowCounters[catKey]}</span></td>
+    <td><input type="number" min="1" value="${stk}" class="stk-input" onchange="recalcAll()" oninput="recalcAll()"></td>
+    <td>${profilCell}</td>
+    <td><input type="number" min="0" placeholder="${optionalDim?'optional':cat.breiteLabel.replace(' (mm)','')}" value="${breite||''}" class="breite-input ${dimClass}" onchange="recalcAll()" oninput="recalcAll()"></td>
+    ${hoeheCell}
+    <td><select class="ausst-select a1" onchange="recalcAll();updateAusstStyles()">${ah}</select></td>
+    <td><select class="ausst-select a2" onchange="recalcAll();updateAusstStyles()">${ah}</select></td>
+    <td><select class="ausst-select a3" onchange="recalcAll();updateAusstStyles()">${ah}</select></td>
+    <td><select class="ausst-select a4" onchange="recalcAll();updateAusstStyles()">${ah}</select></td>
+    <td><select class="ausst-select a5" onchange="recalcAll();updateAusstStyles()">${ah}</select></td>
+    <td><input type="number" step="0.5" class="edit-input az-input" oninput="setOverride(this,'az')" placeholder="${cat.hasAzTable?'–':'AZ'}"></td>
+    <td class="result-cell ek" data-ek>–</td>
+    <td><input type="number" step="0.1" class="edit-input marge-input" oninput="setOverride(this,'marge')" placeholder="–"></td>
+    <td class="result-cell vk" data-vk>–</td>
+    <td><input type="number" step="1" class="edit-input ep-input" oninput="setOverride(this,'ep')" placeholder="–"></td>
+    <td class="result-cell gp" data-gp>–</td>
+    <td class="no-print" style="white-space:nowrap"><button type="button" class="btn btn-reset" onclick="resetRow(this)" title="Standardwerte">↺</button><button type="button" class="btn btn-remove" onclick="removeRow(this)" title="Entfernen">✕</button></td>`;
+}
+
+function addRow(catKey){
+  const g=document.getElementById('group-'+catKey);if(!g)return;
+  const tbody=g.querySelector('tbody');
+  const tr=document.createElement('tr');
+  tr.innerHTML=createRowHTML(catKey,1,'','');
+  tbody.appendChild(tr);
+  recalcAll();renderMobileCards();
+}
+
+function removeRow(btn){
+  const tr=btn.closest('tr');
+  const g=tr.closest('.calc-group');
+  tr.remove();
+  renumberRows(g);
+  recalcAll();renderMobileCards();
+}
+
+function renumberRows(groupEl){
+  const catKey=groupEl.dataset.cat;
+  rowCounters[catKey]=0;
+  groupEl.querySelectorAll('tbody tr').forEach(tr=>{
+    rowCounters[catKey]++;
+    const b=tr.querySelector('.pos-badge');if(b)b.textContent=rowCounters[catKey];
+  });
+}
+
+function duplicateRow(srcRow){
+  const g=srcRow.closest('.calc-group');
+  const catKey=g.dataset.cat;
+  const stk=srcRow.querySelector('.stk-input').value||1;
+  const pv=srcRow.querySelector('.profil-select').value;
+  const b=srcRow.querySelector('.breite-input').value;
+  const hInput=srcRow.querySelector('.hoehe-input');
+  const h=hInput?hInput.value:'';
+  const av=[];for(let n=1;n<=5;n++)av.push(srcRow.querySelector(`.a${n}`).value);
+  const tr=document.createElement('tr');
+  tr.innerHTML=createRowHTML(catKey,stk,b,h);
+  g.querySelector('tbody').appendChild(tr);
+  tr.querySelector('.profil-select').value=pv;
+  for(let n=1;n<=5;n++)tr.querySelector(`.a${n}`).value=av[n-1];
+  if(srcRow.dataset.azOverride==='true'){tr.dataset.azOverride='true';tr.querySelector('.az-input').value=srcRow.querySelector('.az-input').value;tr.querySelector('.az-input').classList.add('field-override');}
+  if(srcRow.dataset.margeOverride==='true'){tr.dataset.margeOverride='true';tr.querySelector('.marge-input').value=srcRow.querySelector('.marge-input').value;tr.querySelector('.marge-input').classList.add('field-override');}
+  if(srcRow.dataset.epOverride==='true'){tr.dataset.epOverride='true';tr.querySelector('.ep-input').value=srcRow.querySelector('.ep-input').value;tr.querySelector('.ep-input').classList.add('field-override');}
+  updateResetBtn(tr);
+}
+
+function dupSelected(catKey){
+  const g=document.getElementById('group-'+catKey);if(!g)return;
+  const checked=g.querySelectorAll('tbody tr .row-check:checked');
+  if(checked.length===0){alert('Bitte mindestens eine Position markieren.');return;}
+  checked.forEach(cb=>duplicateRow(cb.closest('tr')));
+  g.querySelectorAll('.row-check').forEach(cb=>{cb.checked=false;});
+  g.querySelectorAll('tbody tr').forEach(tr=>tr.classList.remove('row-selected'));
+  updateAusstStyles(g);recalcAll();renderMobileCards();
+}
+
+function updateRowSelection(cb){const tr=cb.closest('tr');if(cb.checked)tr.classList.add('row-selected');else tr.classList.remove('row-selected');}
+
+function setOverride(input,field){
+  const tr=input.closest('tr');
+  if(field==='az'){tr.dataset.azOverride='true';input.classList.add('field-override');}
+  else if(field==='marge'){tr.dataset.margeOverride='true';delete tr.dataset.epOverride;input.classList.add('field-override');tr.querySelector('.ep-input').classList.remove('field-override');}
+  else if(field==='ep'){tr.dataset.epOverride='true';delete tr.dataset.margeOverride;input.classList.add('field-override');tr.querySelector('.marge-input').classList.remove('field-override');}
+  updateResetBtn(tr);recalcAll();
+}
+
+function resetRow(btn){
+  const tr=btn.closest('tr');
+  delete tr.dataset.azOverride;delete tr.dataset.margeOverride;delete tr.dataset.epOverride;
+  const azI=tr.querySelector('.az-input');azI.value='';azI.classList.remove('field-override');
+  const mI=tr.querySelector('.marge-input');mI.value='';mI.classList.remove('field-override');
+  const eI=tr.querySelector('.ep-input');eI.value='';eI.classList.remove('field-override');
+  updateResetBtn(tr);recalcAll();
+}
+
+function updateResetBtn(tr){
+  const btn=tr.querySelector('.btn-reset');if(!btn)return;
+  const has=tr.dataset.azOverride==='true'||tr.dataset.margeOverride==='true'||tr.dataset.epOverride==='true';
+  btn.classList.toggle('has-overrides',has);
+}
+
+function rebuildAllDropdowns(){
+  activeGroups.forEach(catKey=>{
+    const g=document.getElementById('group-'+catKey);if(!g)return;
+    const cat=CATEGORIES[catKey];
+    const ah=buildAusstOptions(catKey);
+    if(cat.profilType==='dropdown'){
+      const ph=buildProfilOptions(catKey);
+      g.querySelectorAll('tbody tr').forEach(tr=>{
+        const ps=tr.querySelector('.profil-select');if(!ps||ps.tagName!=='SELECT')return;
+        const pv=ps.value;ps.innerHTML=ph;ps.value=pv;
+      });
+    }
+    g.querySelectorAll('tbody tr').forEach(tr=>{
+      for(let n=1;n<=5;n++){const as=tr.querySelector(`.a${n}`);if(!as)continue;const av=as.value;as.innerHTML=ah;as.value=av;}
+    });
+    updateAusstStyles(g);
+  });
+}
+
+// ════════════ CALCULATION ════════════
+function recalcAll(){
+  let grandEK=0,grandAZ=0,grandEP=0,grandGP=0;
+
+  activeGroups.forEach(catKey=>{
+    const g=document.getElementById('group-'+catKey);if(!g)return;
+    const cat=CATEGORIES[catKey];
+    const rows=g.querySelectorAll('tbody tr');
+    const useProfile=cat.hasProfile;
+    const useAzTable=cat.hasAzTable;
+    let grpEK=0,grpAZ=0,grpEP=0,grpGP=0;
+
+    const prevAZInput=g.querySelector('.prev-az-input');
+    const prevAZTotal=cat.hasPrevAZ&&prevAZInput?(parseFloat(prevAZInput.value)||0):0;
+    const numRows=rows.length;
+    const prevAZPerRow=numRows>0?prevAZTotal/numRows:0;
+
+    rows.forEach((tr,idx)=>{
+      const profilVal=tr.querySelector('.profil-select').value;
+      const breite=parseFloat(tr.querySelector('.breite-input').value)||0;
+      const hoeheInput=tr.querySelector('.hoehe-input');
+      const hoehe=hoeheInput?(parseFloat(hoeheInput.value)||0):0;
+      const stk=parseInt(tr.querySelector('.stk-input').value)||1;
+
+      if(idx<rows.length-1)tr.classList.add('pos-separator');else tr.classList.remove('pos-separator');
+
+      if(useProfile){
+        if(!profilVal||breite<=0||(cat.hasHoehe&&hoehe<=0)){
+          if(tr.dataset.azOverride!=='true')tr.querySelector('.az-input').value='';
+          tr.querySelector('[data-ek]').innerHTML='–';
+          if(tr.dataset.margeOverride!=='true')tr.querySelector('.marge-input').value='';
+          tr.querySelector('[data-vk]').textContent='–';
+          if(tr.dataset.epOverride!=='true')tr.querySelector('.ep-input').value='';
+          tr.querySelector('[data-gp]').textContent='–';
+          return;
+        }
+      }else{
+        const hasAusst=[1,2,3,4,5].some(n=>!!tr.querySelector(`.a${n}`).value);
+        if(!hasAusst){
+          if(tr.dataset.azOverride!=='true')tr.querySelector('.az-input').value='';
+          tr.querySelector('[data-ek]').innerHTML='–';
+          if(tr.dataset.margeOverride!=='true')tr.querySelector('.marge-input').value='';
+          tr.querySelector('[data-vk]').textContent='–';
+          if(tr.dataset.epOverride!=='true')tr.querySelector('.ep-input').value='';
+          tr.querySelector('[data-gp]').textContent='–';
+          return;
+        }
+      }
+
+      let profilEK=0,profilVK=0,baseEK=0,baseVK=0;
+      const ausstDetails=[];
+
+      if(useProfile){
+        const profil=cat.profile[parseInt(profilVal)];if(!profil)return;
+        const dim2=cat.hasHoehe?hoehe:breite;
+        const qm=(breite/1000)*(dim2/1000);
+        profilEK=qm*profil.ek;profilVK=qm*profil.vk;
+        baseEK=profilEK;baseVK=profilVK;
+      }
+
+      for(let n=1;n<=5;n++){
+        const sel=tr.querySelector(`.a${n}`);
+        if(sel){const d=calcAusstDetail(sel.value,breite,hoehe);if(d){ausstDetails.push(d);baseEK+=d.ek;baseVK+=d.vk;}}
+      }
+
+      const dim2=cat.hasHoehe?hoehe:breite;
+      const qm=(breite/1000)*(dim2/1000);
+      const baseAZ=useAzTable?getAZ(catKey,qm):0;
+
+      const azOv=tr.dataset.azOverride==='true';
+      const margeOv=tr.dataset.margeOverride==='true';
+      const epOv=tr.dataset.epOverride==='true';
+
+      let posAZ=azOv?(parseFloat(tr.querySelector('.az-input').value)):baseAZ;
+      if(isNaN(posAZ))posAZ=baseAZ;
+      let az=posAZ+prevAZPerRow;
+
+      let marge,vk,ep;
+      if(epOv){
+        ep=parseFloat(tr.querySelector('.ep-input').value);if(isNaN(ep))ep=0;
+        vk=ep-az*stundensatz;
+        marge=baseEK>0?((vk-baseEK)/baseEK)*100:0;
+      }else if(margeOv){
+        marge=parseFloat(tr.querySelector('.marge-input').value);if(isNaN(marge))marge=0;
+        vk=baseEK*(1+marge/100);
+        ep=vk+az*stundensatz;
+      }else{
+        vk=baseVK;
+        marge=baseEK>0?((baseVK-baseEK)/baseEK)*100:0;
+        ep=vk+az*stundensatz;
+      }
+
+      const gp=ep*stk;
+
+      if(!azOv)tr.querySelector('.az-input').value=posAZ>0?posAZ.toFixed(1):(useAzTable?posAZ.toFixed(1):'');
+      if(!margeOv)tr.querySelector('.marge-input').value=marge.toFixed(1);
+      if(!epOv)tr.querySelector('.ep-input').value=ep.toFixed(2);
+
+      const azEl=tr.querySelector('.az-input'),margeEl=tr.querySelector('.marge-input'),epEl=tr.querySelector('.ep-input');
+      azEl.classList.toggle('field-override',azOv);
+      margeEl.classList.toggle('field-override',margeOv);
+      epEl.classList.toggle('field-override',epOv);
+      azEl.classList.toggle('field-zero',az===0);
+      margeEl.classList.toggle('field-zero',marge===0||isNaN(marge));
+      epEl.classList.toggle('field-zero',ep===0||isNaN(ep));
+
+      let ekHTML=`<div class="ek-total">${fmt(baseEK)}</div><div class="ek-detail">`;
+      if(useProfile&&profilEK>0) ekHTML+=`<div class="ek-line ek-profil">${cat.profilLabel}: ${fmt(profilEK)}</div>`;
+      ausstDetails.forEach(d=>{ekHTML+=`<div class="ek-line">+ ${d.name}: ${fmt(d.ek)}</div>`;});
+      if(prevAZPerRow>0) ekHTML+=`<div class="ek-line" style="color:#8b5cf6">+ Bish. Aufw.: ${prevAZPerRow.toFixed(2)} h</div>`;
+      ekHTML+='</div>';
+      tr.querySelector('[data-ek]').innerHTML=ekHTML;
+      tr.querySelector('[data-vk]').textContent=fmt(vk);
+      tr.querySelector('[data-gp]').textContent=fmt(gp);
+
+      grpEK+=baseEK*stk;grpAZ+=az*stk;grpEP+=ep;grpGP+=gp;
+    });
+
+    // Update group summary
+    const gs=g.querySelectorAll('.gs');
+    if(gs.length>=4){gs[0].textContent='EK: '+fmt(grpEK);gs[1].textContent='AZ: '+fmtH(grpAZ);gs[2].textContent='EP: '+fmt(grpEP);gs[3].textContent='GP: '+fmt(grpGP);}
+
+    // Update prevAZ detail
+    if(cat.hasPrevAZ&&prevAZTotal>0&&numRows>0){
+      const det=g.querySelector('.prev-az-detail');
+      if(det)det.textContent=`÷ ${numRows} Pos. = ${prevAZPerRow.toFixed(2)} h/Pos.`;
+    }else{
+      const det=g.querySelector('.prev-az-detail');if(det)det.textContent='';
+    }
+
+    grandEK+=grpEK;grandAZ+=grpAZ;grandEP+=grpEP;grandGP+=grpGP;
+  });
+
+  document.getElementById('sumEK').textContent=fmt(grandEK);
+  document.getElementById('sumAZ').textContent=fmtH(grandAZ);
+  document.getElementById('sumEP').textContent=fmt(grandEP);
+  document.getElementById('sumGP').textContent=fmt(grandGP);
+
+  updateMobileCards();
+}
+
+// ════════════ STAMMDATEN ════════════
+function renderStammdaten(){
+  const catKeys=Object.keys(CATEGORIES);
+  let h='<div class="sd-info">Hier kannst du alle Preise, Profile und Arbeitszeiten anpassen. Änderungen wirken sich sofort auf die Kalkulation aus.</div>';
+
+  // Profiles per category
+  catKeys.forEach(ck=>{
+    const cat=CATEGORIES[ck];
+    if(!cat.hasProfile)return;
+    const colorClass=(ck!=='rollladen')?'cat-'+ck:'';
+    h+=`<div class="sd-section" data-sd-profile="${ck}">
+      <h2 class="${colorClass}">${cat.label} – ${cat.profilTitle}</h2>
+      <div class="table-wrap sd-table"><table><thead><tr>
+        <th style="text-align:left">${cat.profilLabel}</th><th style="width:100px">EK / m²</th><th style="width:100px">VK / m²</th><th style="width:40px"></th>
+      </tr></thead><tbody>`;
+    cat.profile.forEach(p=>{
+      h+=`<tr><td><input type="text" value="${p.name}"></td><td><input type="number" step="0.01" value="${p.ek}"></td><td><input type="number" step="0.01" value="${p.vk}"></td><td><button class="sd-btn-sm sd-btn-del" onclick="sdDelRow(this)">✕</button></td></tr>`;
+    });
+    h+=`</tbody></table></div>
+      <button type="button" class="sd-btn-sm sd-btn-add sd-add-row" onclick="sdAddProfile('${ck}')">＋ ${cat.profilLabel} hinzufügen</button></div>`;
+  });
+
+  // Ausstattung tables with availability
+  const ausstTables=[
+    {arr:AUSST_BREITE,id:'sdBreite',title:'Ausstattung – Preis nach Breite (pro lfd. Meter)',unit:'m'},
+    {arr:AUSST_HOEHE,id:'sdHoehe',title:'Ausstattung – Preis nach Höhe (pro lfd. Meter)',unit:'m'},
+    {arr:AUSST_STUECK,id:'sdStueck',title:'Ausstattung – Preis pro Stück',unit:'Stk'}
+  ];
+  ausstTables.forEach(at=>{
+    h+=`<div class="sd-section" data-sd-ausst="${at.id}">
+      <h2>${at.title}</h2>
+      <div class="table-wrap sd-table"><table><thead><tr>
+        <th style="text-align:left">Bezeichnung</th><th style="width:90px">EK / ${at.unit}</th><th style="width:90px">VK / ${at.unit}</th>`;
+    catKeys.forEach(ck=>{h+=`<th style="width:40px;text-align:center;font-size:.7rem">${CATEGORIES[ck].shortLabel}</th>`;});
+    h+=`<th style="width:40px"></th></tr></thead><tbody id="${at.id}">`;
+    at.arr.forEach((item,i)=>{
+      h+=`<tr><td><input type="text" value="${item.name}"></td><td><input type="number" step="0.01" value="${item.ek}"></td><td><input type="number" step="0.01" value="${item.vk}"></td>`;
+      catKeys.forEach(ck=>{
+        const on=item.avail[ck];
+        h+=`<td class="avail-toggle ${on?'on':'off'}" onclick="toggleAvail(this,'${at.id}',${i},'${ck}')">${on?'✓':'–'}</td>`;
+      });
+      h+=`<td><button class="sd-btn-sm sd-btn-del" onclick="sdDelAusst(this,'${at.id}')">✕</button></td></tr>`;
+    });
+    h+=`</tbody></table></div>
+      <button type="button" class="sd-btn-sm sd-btn-add sd-add-row" onclick="sdAddAusst('${at.id}')">＋ Ausstattung hinzufügen</button></div>`;
+  });
+
+  // AZ tables per category
+  catKeys.forEach(ck=>{
+    const cat=CATEGORIES[ck];
+    if(!cat.hasAzTable)return;
+    const colorClass=(ck!=='rollladen')?'cat-'+ck:'';
+    h+=`<div class="sd-section" data-sd-az="${ck}">
+      <h2 class="${colorClass}">${cat.label} – ${cat.azTitle}</h2>
+      <div class="table-wrap sd-table"><table><thead><tr><th style="text-align:left">Größe</th><th style="width:120px">Arbeitszeit (h)</th></tr></thead><tbody>`;
+    cat.azTable.forEach(t=>{
+      h+=`<tr><td>${t.label}</td><td><input type="number" step="0.5" value="${t.az}"></td></tr>`;
+    });
+    h+=`</tbody></table></div></div>`;
+  });
+
+  // Stundensatz
+  h+=`<div class="sd-section"><h2>Stundensatz (Montage)</h2>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;">
+      <label style="font-size:.9rem;font-weight:600;color:var(--text-muted);">Stundensatz:</label>
+      <input type="number" id="sdStundensatz" min="0" step="5" value="${stundensatz}" style="width:100px;border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:.9rem;font-weight:600;text-align:right;background:#fff;color:var(--text);">
+      <span style="font-size:.85rem;color:var(--text-muted);">€ / h</span>
+    </div></div>`;
+
+  document.getElementById('viewStamm').innerHTML=h;
+}
+
+function syncFromStammdaten(){
+  const view=document.getElementById('viewStamm');
+  if(!view.innerHTML)return;
+
+  // Sync profiles
+  Object.keys(CATEGORIES).forEach(ck=>{
+    const cat=CATEGORIES[ck];if(!cat.hasProfile)return;
+    const sec=view.querySelector(`[data-sd-profile="${ck}"]`);if(!sec)return;
+    const newP=[];
+    sec.querySelectorAll('tbody tr').forEach(tr=>{
+      const inp=tr.querySelectorAll('input');
+      if(inp.length>=3)newP.push({name:inp[0].value.trim(),ek:parseFloat(inp[1].value)||0,vk:parseFloat(inp[2].value)||0});
+    });
+    cat.profile=newP;
+  });
+
+  // Sync Ausstattung
+  const syncAusst=(id,arr)=>{
+    const tbody=view.querySelector(`#${id}`);if(!tbody)return arr;
+    const catKeys=Object.keys(CATEGORIES);
+    const newArr=[];
+    tbody.querySelectorAll('tr').forEach((tr,i)=>{
+      const inp=tr.querySelectorAll('input');
+      const avails=tr.querySelectorAll('.avail-toggle');
+      if(inp.length>=3){
+        const avail={};
+        avails.forEach((td,ci)=>{if(catKeys[ci])avail[catKeys[ci]]=td.classList.contains('on');});
+        newArr.push({name:inp[0].value.trim(),ek:parseFloat(inp[1].value)||0,vk:parseFloat(inp[2].value)||0,avail});
+      }
+    });
+    return newArr;
+  };
+  AUSST_BREITE=syncAusst('sdBreite',AUSST_BREITE);
+  AUSST_HOEHE=syncAusst('sdHoehe',AUSST_HOEHE);
+  AUSST_STUECK=syncAusst('sdStueck',AUSST_STUECK);
+
+  // Sync AZ tables
+  Object.keys(CATEGORIES).forEach(ck=>{
+    const cat=CATEGORIES[ck];if(!cat.hasAzTable)return;
+    const sec=view.querySelector(`[data-sd-az="${ck}"]`);if(!sec)return;
+    sec.querySelectorAll('tbody tr').forEach((tr,i)=>{
+      const inp=tr.querySelector('input[type=number]');
+      if(inp&&cat.azTable[i])cat.azTable[i].az=parseFloat(inp.value)||0;
+    });
+  });
+
+  // Sync stundensatz
+  const ssInput=view.querySelector('#sdStundensatz');
+  if(ssInput)stundensatz=parseFloat(ssInput.value)||0;
+}
+
+function toggleAvail(td,tableId,itemIdx,catKey){
+  const isOn=td.classList.contains('on');
+  td.classList.toggle('on',!isOn);td.classList.toggle('off',isOn);
+  td.textContent=isOn?'–':'✓';
+  // Update data immediately
+  let arr;
+  if(tableId==='sdBreite')arr=AUSST_BREITE;
+  else if(tableId==='sdHoehe')arr=AUSST_HOEHE;
+  else arr=AUSST_STUECK;
+  if(arr[itemIdx])arr[itemIdx].avail[catKey]=!isOn;
+}
+
+function sdAddProfile(catKey){
+  const cat=CATEGORIES[catKey];
+  syncFromStammdaten();
+  cat.profile.push({name:`Neue/r ${cat.profilLabel}`,ek:0,vk:0});
+  renderStammdaten();
+}
+
+function sdAddAusst(tableId){
+  syncFromStammdaten();
+  const avail={};Object.keys(CATEGORIES).forEach(ck=>avail[ck]=false);
+  const item={name:"Neue Ausstattung",ek:0,vk:0,avail};
+  if(tableId==='sdBreite')AUSST_BREITE.push(item);
+  else if(tableId==='sdHoehe')AUSST_HOEHE.push(item);
+  else AUSST_STUECK.push(item);
+  renderStammdaten();
+}
+
+function sdDelRow(btn){
+  const tr=btn.closest('tr');
+  const sec=tr.closest('[data-sd-profile]');
+  if(!sec)return;
+  const catKey=sec.dataset.sdProfile;
+  syncFromStammdaten();
+  const rows=[...sec.querySelectorAll('tbody tr')];
+  const idx=rows.indexOf(tr);
+  if(idx>-1)CATEGORIES[catKey].profile.splice(idx,1);
+  renderStammdaten();
+}
+
+function sdDelAusst(btn,tableId){
+  const tr=btn.closest('tr');
+  syncFromStammdaten();
+  const tbody=document.getElementById(tableId);
+  const rows=[...tbody.querySelectorAll('tr')];
+  const idx=rows.indexOf(tr);
+  if(idx>-1){
+    if(tableId==='sdBreite')AUSST_BREITE.splice(idx,1);
+    else if(tableId==='sdHoehe')AUSST_HOEHE.splice(idx,1);
+    else AUSST_STUECK.splice(idx,1);
+  }
+  renderStammdaten();
+}
+
+// ════════════ PDF EXPORT ════════════
+function exportPDF(){
+  const groups=[...document.querySelectorAll('.calc-group')];
+  if(groups.length===0){alert('Bitte mindestens einen Bereich hinzufügen.');return;}
+
+  // Check for zero values
+  const zeroFields=document.querySelectorAll('.edit-input.field-zero');
+  if(zeroFields.length>0){
+    const count=zeroFields.length;
+    if(!confirm(`Achtung: ${count} Feld(er) mit Wert 0 gefunden (AZ, Marge oder EP).\n\nTrotzdem exportieren?`))return;
+  }
+
+  const today=new Date().toLocaleDateString('de-DE');
+  const kalkName=(document.getElementById('kalkName').value||'').trim();
+  const pdfTitle=kalkName?`Kalk-${kalkName}`:'Kalkulation';
+  let grandEK=0,grandAZ=0,grandEP=0,grandGP=0;
+  let bodyHTML='';
+
+  groups.forEach((g,gi)=>{
+    const catKey=g.dataset.cat;
+    const cat=CATEGORIES[catKey];
+    const useProfile=cat.hasProfile;
+    const useAzTable=cat.hasAzTable;
+    const prevAZInput=g.querySelector('.prev-az-input');
+    const prevAZTotal=cat.hasPrevAZ&&prevAZInput?(parseFloat(prevAZInput.value)||0):0;
+    const rows=g.querySelectorAll('tbody tr');
+    const numRows=rows.length;
+    const prevAZPerRow=numRows>0?prevAZTotal/numRows:0;
+    const positions=[];
+
+    rows.forEach(tr=>{
+      const profilVal=tr.querySelector('.profil-select').value;
+      const breite=parseFloat(tr.querySelector('.breite-input').value)||0;
+      const hoeheInput=tr.querySelector('.hoehe-input');
+      const hoehe=hoeheInput?(parseFloat(hoeheInput.value)||0):0;
+      const stk=parseInt(tr.querySelector('.stk-input').value)||1;
+      let profilName='',profilEK=0,profilVK=0,baseEK=0,baseVK=0;
+      if(useProfile){
+        if(!profilVal)return;
+        const profil=cat.profile[parseInt(profilVal)];if(!profil)return;
+        const dim2=cat.hasHoehe?hoehe:breite;
+        const qm=(breite/1000)*(dim2/1000);
+        profilName=profil.name;profilEK=qm*profil.ek;profilVK=qm*profil.vk;
+        baseEK=profilEK;baseVK=profilVK;
+      }else{
+        profilName=profilVal||'Reparatur';
+        if(![1,2,3,4,5].some(n=>!!tr.querySelector(`.a${n}`).value))return;
+      }
+      const ausstLines=[];
+      for(let n=1;n<=5;n++){const sel=tr.querySelector(`.a${n}`);if(sel&&sel.value){const d=calcAusstDetail(sel.value,breite,hoehe);if(d){ausstLines.push(d);baseEK+=d.ek;baseVK+=d.vk;}}}
+      const dim2=cat.hasHoehe?hoehe:breite;
+      const qm=(breite/1000)*(dim2/1000);
+      const baseAZ=useAzTable?getAZ(catKey,qm):0;
+      const azOv=tr.dataset.azOverride==='true';const margeOv=tr.dataset.margeOverride==='true';const epOv=tr.dataset.epOverride==='true';
+      let posAZ=azOv?(parseFloat(tr.querySelector('.az-input').value)||baseAZ):baseAZ;
+      let az=posAZ+prevAZPerRow;
+      let marge,vk,ep;
+      if(epOv){ep=parseFloat(tr.querySelector('.ep-input').value)||0;vk=ep-az*stundensatz;marge=baseEK>0?((vk-baseEK)/baseEK)*100:0;}
+      else if(margeOv){marge=parseFloat(tr.querySelector('.marge-input').value)||0;vk=baseEK*(1+marge/100);ep=vk+az*stundensatz;}
+      else{vk=baseVK;marge=baseEK>0?((baseVK-baseEK)/baseEK)*100:0;ep=vk+az*stundensatz;}
+      positions.push({pos:tr.querySelector('.pos-badge').textContent,profil:profilName,breite,hoehe,stk,profilEK,ausstLines,baseEK,az,marge,vk,ep,gp:ep*stk,prevAZPerRow});
+    });
+
+    if(positions.length===0)return;
+    const showDims=useProfile||(positions.some(p=>p.breite>0||p.hoehe>0));
+    let secEK=0,secAZ=0,secEP=0,secGP=0;
+
+    if(gi>0)bodyHTML+=`<div style="margin-top:16px;border-top:3px solid #1e293b;padding-top:12px"></div>`;
+    bodyHTML+=`<h2 style="font-size:12px;margin-bottom:4px;color:#1e293b">${cat.label}</h2>`;
+    if(prevAZTotal>0)bodyHTML+=`<div style="font-size:8px;color:#8b5cf6;margin-bottom:6px">Bisheriger Aufwand: ${fmtH(prevAZTotal)} (÷ ${positions.length} Pos.)</div>`;
+
+    bodyHTML+=`<table><thead><tr>
+      <th style="width:26px">Pos</th><th style="width:24px">Stk</th>
+      <th>${useProfile?cat.profilLabel+' / ':''}Ausstattung</th>
+      ${showDims?`<th style="width:46px" class="r">${cat.breiteLabel.replace(' (mm)','')}</th>${cat.hasHoehe?`<th style="width:42px" class="r">${cat.hoeheLabel.replace(' (mm)','')}</th>`:''}`:''}
+      <th style="width:42px" class="r">AZ</th><th style="width:64px" class="r">EK</th>
+      <th style="width:50px" class="r">Marge</th><th style="width:64px" class="r">VK</th>
+      <th style="width:64px" class="r">EP</th><th style="width:70px" class="r">GP</th>
+    </tr></thead><tbody>`;
+
+    positions.forEach((p,pi)=>{
+      const nRows=1+(useProfile?1:0)+p.ausstLines.length+(p.prevAZPerRow>0?1:0);
+      const bt=pi>0?'border-top:2.5px solid #1e293b;':'';
+      bodyHTML+=`<tr style="${bt}">
+        <td rowspan="${nRows}" style="vertical-align:top;font-weight:700;${bt}">${p.pos}</td>
+        <td rowspan="${nRows}" style="vertical-align:top;${bt}">${p.stk}</td>
+        <td style="font-weight:700;${bt}">${p.profil}</td>
+        ${showDims?`<td rowspan="${nRows}" style="vertical-align:top;${bt}">${p.breite||'–'}</td>${cat.hasHoehe?`<td rowspan="${nRows}" style="vertical-align:top;${bt}">${p.hoehe||'–'}</td>`:''}`:''}
+        <td class="r" rowspan="${nRows}" style="vertical-align:top;${bt}">${fmtH(p.az)}</td>
+        <td class="r" style="font-weight:700;font-size:12px;${bt};border-bottom:1px solid #94a3b8">${fmt(p.baseEK)}</td>
+        <td class="r" rowspan="${nRows}" style="vertical-align:top;${bt}">${fmtP(p.marge)}</td>
+        <td class="r" rowspan="${nRows}" style="vertical-align:top;${bt}">${fmt(p.vk)}</td>
+        <td class="r" rowspan="${nRows}" style="vertical-align:top;font-weight:700;${bt}">${fmt(p.ep)}</td>
+        <td class="r" rowspan="${nRows}" style="vertical-align:top;font-weight:700;font-size:12px;${bt}">${fmt(p.gp)}</td>
+      </tr>`;
+      if(useProfile)bodyHTML+=`<tr><td style="color:#64748b;font-size:.72rem;padding-left:8px">${cat.profilLabel}</td><td class="r" style="color:#2563eb;font-size:.72rem;font-weight:600">${fmt(p.profilEK)}</td></tr>`;
+      p.ausstLines.forEach(a=>{bodyHTML+=`<tr><td style="color:#64748b;font-size:.72rem;padding-left:8px">+ ${a.name}</td><td class="r" style="color:#64748b;font-size:.72rem">${fmt(a.ek)}</td></tr>`;});
+      if(p.prevAZPerRow>0)bodyHTML+=`<tr><td style="color:#8b5cf6;font-size:.72rem;padding-left:8px">+ Bish. Aufwand</td><td class="r" style="color:#8b5cf6;font-size:.72rem">${fmtH(p.prevAZPerRow)}</td></tr>`;
+      secEK+=p.baseEK*p.stk;secAZ+=p.az*p.stk;secEP+=p.ep;secGP+=p.gp;
+    });
+
+    bodyHTML+=`</tbody></table>`;
+    bodyHTML+=`<div class="totals" style="margin-top:4px;margin-bottom:6px;font-size:9px"><div class="tb"><div class="l">EK</div><div class="v" style="font-size:10px">${fmt(secEK)}</div></div><div class="tb"><div class="l">AZ</div><div class="v" style="font-size:10px">${fmtH(secAZ)}</div></div><div class="tb"><div class="l">EP</div><div class="v" style="font-size:10px">${fmt(secEP)}</div></div><div class="tb"><div class="l">GP</div><div class="v" style="font-size:10px">${fmt(secGP)}</div></div></div>`;
+    grandEK+=secEK;grandAZ+=secAZ;grandEP+=secEP;grandGP+=secGP;
+  });
+
+  if(!bodyHTML){alert('Keine Positionen vorhanden.');return;}
+
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><title>${pdfTitle}</title>
+<style>@page{size:A4 landscape;margin:14mm 10mm}*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',system-ui,sans-serif;padding:20px;color:#1e293b;font-size:10px}h1{font-size:14px;margin-bottom:3px}h2{font-size:12px}
+.meta{color:#64748b;font-size:9px;margin-bottom:14px}table{width:100%;border-collapse:collapse;margin-bottom:6px}
+th{background:#1e293b;color:#fff;padding:5px 6px;text-align:left;font-weight:600;font-size:8px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+td{padding:4px 6px;border-bottom:1px solid #e2e8f0;white-space:nowrap;font-size:10px}.r{text-align:right}
+.totals{display:flex;gap:16px;justify-content:flex-end;margin-top:10px}.tb{text-align:right}.tb .l{font-size:8px;text-transform:uppercase;color:#64748b;letter-spacing:.04em}.tb .v{font-size:12px;font-weight:700}
+hr{border:none;border-top:2.5px solid #1e293b;margin:10px 0}</style></head><body>
+  <h1>Kalkulation${kalkName?' – '+kalkName:''}</h1>
+  <div class="meta">Erstellt am ${today} | Stundensatz: ${stundensatz.toFixed(2)} €/h</div>
+  ${bodyHTML}
+  <hr>
+  <div class="totals">
+    <div class="tb"><div class="l">Gesamt EK</div><div class="v">${fmt(grandEK)}</div></div>
+    <div class="tb"><div class="l">Gesamt AZ</div><div class="v">${fmtH(grandAZ)}</div></div>
+    <div class="tb"><div class="l">Gesamt EP</div><div class="v">${fmt(grandEP)}</div></div>
+    <div class="tb"><div class="l">Gesamt GP</div><div class="v" style="font-size:14px">${fmt(grandGP)}</div></div>
+  </div></body></html>`);
+  w.document.close();
+  setTimeout(()=>{w.focus();w.print();},400);
+}
+
+// ════════════ MOBILE CARDS ════════════
+function isMobile(){return window.innerWidth<=860;}
+
+function renderMobileCards(){
+  if(!isMobile())return;
+  const container=document.getElementById('mobileCardsAll');
+  container.innerHTML='';
+
+  activeGroups.forEach(catKey=>{
+    const g=document.getElementById('group-'+catKey);if(!g)return;
+    const cat=CATEGORIES[catKey];
+    const isText=cat.profilType==='text';
+    const rows=g.querySelectorAll('tbody tr');
+
+    const ghdr=document.createElement('div');
+    ghdr.className='m-group-header';
+    ghdr.style.borderLeftColor=`var(--cat-${catKey})`;
+    ghdr.textContent=cat.label;
+    container.appendChild(ghdr);
+
+    rows.forEach((tr,idx)=>{
+      const posNum=idx+1;
+      const profilVal=tr.querySelector('.profil-select').value;
+      const breite=tr.querySelector('.breite-input').value||'';
+      const hoeheInput=tr.querySelector('.hoehe-input');
+      const hoehe=hoeheInput?hoeheInput.value||'':'';
+      const stk=tr.querySelector('.stk-input').value||'1';
+      const ausstHTML=buildAusstOptions(catKey);
+      let ausstSelects='';
+      for(let n=1;n<=5;n++) ausstSelects+=`<select class="ausst-select" data-cat="${catKey}" data-row="${idx}" data-ausst="${n}">${ausstHTML}</select>`;
+
+      const ekEl=tr.querySelector('[data-ek]');
+      const ekTotalEl=ekEl?.querySelector('.ek-total');
+      const ekTotal=ekTotalEl?ekTotalEl.textContent:'–';
+      const ekDetailEl=ekEl?.querySelector('.ek-detail');
+      const ekDetail=ekDetailEl?ekDetailEl.innerHTML:'';
+      const azVal=tr.querySelector('.az-input').value||'–';
+      const margeVal=tr.querySelector('.marge-input').value||'–';
+      const vk=tr.querySelector('[data-vk]')?.textContent||'–';
+      const epVal=tr.querySelector('.ep-input').value||'–';
+      const gp=tr.querySelector('[data-gp]')?.textContent||'–';
+      const azOv=tr.dataset.azOverride==='true';const margeOv=tr.dataset.margeOverride==='true';const epOv=tr.dataset.epOverride==='true';
+      const hasOverrides=azOv||margeOv||epOv;
+
+      let profilRow;
+      if(isText){profilRow=`<div class="m-row"><label>${cat.profilLabel}</label><input type="text" placeholder="z.B. RL Küche" value="${profilVal}" data-cat="${catKey}" data-row="${idx}" data-field="profil"></div>`;}
+      else{profilRow=`<div class="m-row"><label>${cat.profilLabel}</label><select data-cat="${catKey}" data-row="${idx}" data-field="profil">${buildProfilOptions(catKey)}</select></div>`;}
+
+      const card=document.createElement('div');card.className='m-card';card.dataset.cat=catKey;card.dataset.rowIdx=idx;
+      const hoeheRow=cat.hasHoehe?`<div><label>${cat.hoeheLabel}</label><input type="number" class="mass-input" placeholder="${cat.hasProfile?cat.hoeheLabel.replace(' (mm)',''):'optional'}" value="${hoehe}" data-cat="${catKey}" data-row="${idx}" data-field="hoehe"></div>`:'';
+      card.innerHTML=`
+        <div class="m-card-header">
+          <span style="display:flex;align-items:center;gap:8px"><span class="pos-badge">${posNum}</span><span style="font-weight:600;font-size:.88rem">Position ${posNum}</span></span>
+          <button type="button" class="btn btn-remove" style="color:#fff;opacity:.7;font-size:1.3rem;min-width:44px;min-height:44px" data-remove-cat="${catKey}" data-remove-idx="${idx}">✕</button>
+        </div>
+        <div class="m-card-body">
+          ${profilRow}
+          <div class="m-stk-row"><label>Stück</label><input type="number" min="1" value="${stk}" data-cat="${catKey}" data-row="${idx}" data-field="stk"></div>
+          <div class="m-masse">
+            <div><label>${cat.breiteLabel}</label><input type="number" class="mass-input" placeholder="${cat.hasProfile?cat.breiteLabel.replace(' (mm)',''):'optional'}" value="${breite}" data-cat="${catKey}" data-row="${idx}" data-field="breite"></div>
+            ${hoeheRow}
+          </div>
+          <div class="m-ausst"><label>Ausstattungen</label>${ausstSelects}</div>
+          <div class="m-edit-row">
+            <div class="m-edit-box"><label>AZ (h)</label><input type="number" step="0.5" value="${azVal!=='–'?azVal:''}" data-cat="${catKey}" data-row="${idx}" data-edit="az" style="${azOv?'border:2px solid #8b5cf6;background:#f5f3ff':''}"></div>
+            <div class="m-edit-box"><label>Marge %</label><input type="number" step="0.1" value="${margeVal!=='–'?margeVal:''}" data-cat="${catKey}" data-row="${idx}" data-edit="marge" style="${margeOv?'border:2px solid #d97706;background:#fffbeb':''}"></div>
+            <div class="m-edit-box"><label>EP (€)</label><input type="number" step="1" value="${epVal!=='–'?epVal:''}" data-cat="${catKey}" data-row="${idx}" data-edit="ep" style="${epOv?'border:2px solid #10b981;background:#ecfdf5':''}"></div>
+          </div>
+          <div class="m-reset-row"><button type="button" class="m-btn-reset ${hasOverrides?'has-overrides':''}" data-reset-cat="${catKey}" data-reset-idx="${idx}">↺ Standardwerte</button></div>
+          <div class="m-results">
+            <div class="m-result-box ek"><div class="m-r-label">EK</div><div class="m-r-value">${ekTotal}</div>${ekDetail?'<div class="m-ek-detail">'+ekDetail+'</div>':''}</div>
+            <div class="m-result-box vk"><div class="m-r-label">VK</div><div class="m-r-value">${vk}</div></div>
+            <div class="m-result-box az"><div class="m-r-label">AZ</div><div class="m-r-value">${azVal!=='–'?azVal+' h':'–'}</div></div>
+            <div class="m-result-box marge"><div class="m-r-label">Marge</div><div class="m-r-value">${margeVal!=='–'?margeVal+' %':'–'}</div></div>
+            <div class="m-result-box ep"><div class="m-r-label">EP</div><div class="m-r-value">${epVal!=='–'?fmt(parseFloat(epVal)):'–'}</div></div>
+            <div class="m-result-box gp"><div class="m-r-label">Gesamtpreis</div><div class="m-r-value">${gp}</div></div>
+          </div>
+        </div>`;
+      container.appendChild(card);
+      if(!isText){const cps=card.querySelector('[data-field="profil"]');if(cps)cps.value=profilVal;}
+      for(let n=1;n<=5;n++){const ca=card.querySelector(`[data-ausst="${n}"][data-cat="${catKey}"]`);const ov=tr.querySelector(`.a${n}`).value;if(ca){ca.value=ov;if(ov)ca.classList.add('ausst-filled');}}
+    });
+
+    // Mobile add button per group
+    const addBtn=document.createElement('div');
+    addBtn.style.cssText='text-align:center;padding:10px';
+    addBtn.innerHTML=`<button type="button" class="btn btn-add" style="width:100%;min-height:48px" onclick="addRow('${catKey}')">＋ Neue Position</button>`;
+    container.appendChild(addBtn);
+  });
+}
+
+function updateMobileCards(){
+  if(!isMobile())return;
+  const container=document.getElementById('mobileCardsAll');
+  const cards=container.querySelectorAll('.m-card');
+  cards.forEach(card=>{
+    const catKey=card.dataset.cat;
+    const rowIdx=parseInt(card.dataset.rowIdx);
+    const g=document.getElementById('group-'+catKey);if(!g)return;
+    const rows=g.querySelectorAll('tbody tr');const tr=rows[rowIdx];if(!tr)return;
+
+    // Read computed values from desktop row
+    const ekEl=tr.querySelector('[data-ek]');
+    const ekTotalEl=ekEl?.querySelector('.ek-total');
+    const ekTotal=ekTotalEl?ekTotalEl.textContent:'–';
+    const ekDetailEl=ekEl?.querySelector('.ek-detail');
+    const ekDetail=ekDetailEl?ekDetailEl.innerHTML:'';
+    const vk=tr.querySelector('[data-vk]')?.textContent||'–';
+    const gp=tr.querySelector('[data-gp]')?.textContent||'–';
+
+    // Read override values
+    const azVal=tr.querySelector('.az-input').value||'–';
+    const margeVal=tr.querySelector('.marge-input').value||'–';
+    const epVal=tr.querySelector('.ep-input').value||'–';
+    const azOv=tr.dataset.azOverride==='true';
+    const margeOv=tr.dataset.margeOverride==='true';
+    const epOv=tr.dataset.epOverride==='true';
+    const hasOverrides=azOv||margeOv||epOv;
+
+    // Update result boxes
+    const results=card.querySelector('.m-results');
+    if(results){
+      const ekBox=results.querySelector('.ek .m-r-value');if(ekBox)ekBox.textContent=ekTotal;
+      const ekDet=results.querySelector('.m-ek-detail');
+      if(ekDet)ekDet.innerHTML=ekDetail;
+      else if(ekDetail){const d=document.createElement('div');d.className='m-ek-detail';d.innerHTML=ekDetail;results.querySelector('.ek')?.appendChild(d);}
+      const vkBox=results.querySelector('.vk .m-r-value');if(vkBox)vkBox.textContent=vk;
+      const azBox=results.querySelector('.az .m-r-value');if(azBox)azBox.textContent=azVal!=='–'?azVal+' h':'–';
+      const margeBox=results.querySelector('.marge .m-r-value');if(margeBox)margeBox.textContent=margeVal!=='–'?margeVal+' %':'–';
+      const epBox=results.querySelector('.ep .m-r-value');if(epBox)epBox.textContent=epVal!=='–'?fmt(parseFloat(epVal)):'–';
+      const gpBox=results.querySelector('.gp .m-r-value');if(gpBox)gpBox.textContent=gp;
+    }
+
+    // Update edit input styles
+    const azInput=card.querySelector('[data-edit="az"]');
+    if(azInput)azInput.style.cssText=azOv?'border:2px solid #8b5cf6;background:#f5f3ff':'';
+    const margeInput=card.querySelector('[data-edit="marge"]');
+    if(margeInput)margeInput.style.cssText=margeOv?'border:2px solid #d97706;background:#fffbeb':'';
+    const epInput=card.querySelector('[data-edit="ep"]');
+    if(epInput)epInput.style.cssText=epOv?'border:2px solid #10b981;background:#ecfdf5':'';
+
+    // Update reset button
+    const rstBtn=card.querySelector('.m-btn-reset');
+    if(rstBtn){if(hasOverrides)rstBtn.classList.add('has-overrides');else rstBtn.classList.remove('has-overrides');}
+  });
+}
+
+function mobileSync(el){
+  const catKey=el.dataset.cat;
+  const rowIdx=parseInt(el.dataset.row);
+  const g=document.getElementById('group-'+catKey);if(!g)return;
+  const rows=g.querySelectorAll('tbody tr');const tr=rows[rowIdx];if(!tr)return;
+  const field=el.dataset.field;const ausstN=el.dataset.ausst;const editField=el.dataset.edit;
+  if(field==='profil')tr.querySelector('.profil-select').value=el.value;
+  else if(field==='breite')tr.querySelector('.breite-input').value=el.value;
+  else if(field==='hoehe'){const hi=tr.querySelector('.hoehe-input');if(hi)hi.value=el.value;}
+  else if(field==='stk')tr.querySelector('.stk-input').value=el.value;
+  else if(ausstN){tr.querySelector(`.a${ausstN}`).value=el.value;if(el.value)el.classList.add('ausst-filled');else el.classList.remove('ausst-filled');}
+  else if(editField){
+    if(editField==='az'){tr.dataset.azOverride='true';tr.querySelector('.az-input').value=el.value;}
+    else if(editField==='marge'){tr.dataset.margeOverride='true';delete tr.dataset.epOverride;tr.querySelector('.marge-input').value=el.value;tr.querySelector('.ep-input').classList.remove('field-override');}
+    else if(editField==='ep'){tr.dataset.epOverride='true';delete tr.dataset.margeOverride;tr.querySelector('.ep-input').value=el.value;tr.querySelector('.marge-input').classList.remove('field-override');}
+    updateResetBtn(tr);
+  }
+  recalcAll();
+}
+
+function mobileReset(catKey,idx){
+  const g=document.getElementById('group-'+catKey);if(!g)return;
+  const rows=g.querySelectorAll('tbody tr');const tr=rows[idx];if(!tr)return;
+  delete tr.dataset.azOverride;delete tr.dataset.margeOverride;delete tr.dataset.epOverride;
+  tr.querySelector('.az-input').value='';tr.querySelector('.az-input').classList.remove('field-override');
+  tr.querySelector('.marge-input').value='';tr.querySelector('.marge-input').classList.remove('field-override');
+  tr.querySelector('.ep-input').value='';tr.querySelector('.ep-input').classList.remove('field-override');
+  updateResetBtn(tr);recalcAll();renderMobileCards();
+}
+function mobileRemove(catKey,idx){
+  const g=document.getElementById('group-'+catKey);if(!g)return;
+  const rows=g.querySelectorAll('tbody tr');if(rows[idx])rows[idx].remove();
+  renumberRows(g);recalcAll();renderMobileCards();
+}
+
+// Delegated mobile events
+document.getElementById('mobileCardsAll').addEventListener('change',e=>{const el=e.target;if(el.dataset.field||el.dataset.ausst||el.dataset.edit)mobileSync(el);});
+document.getElementById('mobileCardsAll').addEventListener('input',e=>{const el=e.target;if(el.dataset.field||el.dataset.edit)mobileSync(el);});
+document.getElementById('mobileCardsAll').addEventListener('click',e=>{
+  const rmBtn=e.target.closest('[data-remove-cat]');
+  if(rmBtn){e.preventDefault();mobileRemove(rmBtn.dataset.removeCat,parseInt(rmBtn.dataset.removeIdx));return;}
+  const rstBtn=e.target.closest('[data-reset-cat]');
+  if(rstBtn){e.preventDefault();mobileReset(rstBtn.dataset.resetCat,parseInt(rstBtn.dataset.resetIdx));}
+});
+
+// ════════════ DRAG & DROP ════════════
+function setupGroupDragDrop(groupEl){
+  const tbody=groupEl.querySelector('tbody');if(!tbody)return;
+  let dragRow=null,dropPosition=null;
+  function clearDragClasses(){tbody.querySelectorAll('tr').forEach(r=>{r.classList.remove('drag-insert-above','drag-insert-below');});}
+  tbody.addEventListener('dragstart',e=>{const tr=e.target.closest('tr');if(!tr)return;dragRow=tr;tr.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain','');});
+  tbody.addEventListener('dragend',e=>{const tr=e.target.closest('tr');if(tr)tr.classList.remove('dragging');clearDragClasses();dragRow=null;dropPosition=null;});
+  tbody.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';if(!dragRow)return;const tr=e.target.closest('tr');if(!tr||tr===dragRow)return;clearDragClasses();const rect=tr.getBoundingClientRect();const mid=rect.top+rect.height/2;if(e.clientY<mid){tr.classList.add('drag-insert-above');dropPosition='before';}else{tr.classList.add('drag-insert-below');dropPosition='after';}});
+  tbody.addEventListener('dragleave',e=>{const tr=e.target.closest('tr');if(tr&&!tr.contains(e.relatedTarget)){tr.classList.remove('drag-insert-above','drag-insert-below');}});
+  tbody.addEventListener('drop',e=>{e.preventDefault();if(!dragRow)return;const tr=e.target.closest('tr');if(!tr||tr===dragRow)return;clearDragClasses();if(dropPosition==='before')tbody.insertBefore(dragRow,tr);else tbody.insertBefore(dragRow,tr.nextSibling);renumberRows(groupEl);recalcAll();renderMobileCards();dragRow=null;dropPosition=null;});
+}
+
+// ════════════ KEYBOARD NAV ════════════
+document.addEventListener('keydown',e=>{
+  if(e.key==='Tab'&&!e.shiftKey){
+    const el=document.activeElement;if(!el||!el.classList.contains('edit-input'))return;
+    const tr=el.closest('tr');if(!tr)return;
+    const inputs=[...tr.querySelectorAll('.edit-input')];
+    const idx=inputs.indexOf(el);
+    if(idx===inputs.length-1){
+      const next=tr.nextElementSibling;
+      if(next){e.preventDefault();const fi=next.querySelector('.edit-input');if(fi)fi.focus();}
+    }
+  }
+});
+
+// ════════════ INIT ════════════
+addGroup('rollladen');
+</script>
+</body>
+</html>
